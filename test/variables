@@ -1,0 +1,4 @@
+cg_num=27
+tol=1.0E-10
+timestep=1.0
+niter=1000
