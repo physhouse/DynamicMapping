@@ -172,12 +172,12 @@ void Engine::matrixSolver()
    double alpha, beta;
    int m,n,lda,incx,incy;
   
-   order = CblasColMajor;
+   order = CblasRowMajor;
    transa = CblasNoTrans;
 
    m = 3 * cg_num;
    n = 3 * fg_num;
-   lda = m;
+   lda = n;
    incx = 1;
    incy = 1;
    alpha = 1.0;
@@ -202,6 +202,7 @@ void Engine::matrixSolver()
    printf("passing cblas\n");
    //for (int i=0; i<m; i++) printf("V_CG[%d] = %f\n", i+1, V_CG[i]);
    //Solving Linear Equations MCG*V=y using lapacke
+   lda = m;
    int size_a = m * m;
    double* A = new double[size_a];
    for (int i=0; i<m; i++)
