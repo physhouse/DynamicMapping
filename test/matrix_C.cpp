@@ -49,7 +49,7 @@ void Matrix_C::weight_deriv(double* R, double* r, double* dw_vec)
      if (r_dim > 0.5 * L) r_dim -= L;
      else if (r_dim < -0.5 * L) r_dim += L;
 
-     dw_vec[0] = dwdr * r_dim / distance;
+     dw_vec[idim] = dwdr * r_dim / distance;
    }
    //printf("dw : %lf   %lf   %lf\n", dw_vec[0], dw_vec[1], dw_vec[2]);
 }
