@@ -64,6 +64,14 @@ void Matrix_M::generate_M()
    {
       for (int J=0; J<cg_num; J++)
       {
+      	//reset to zero!
+        for (int jdim = 0; jdim < 3; jdim++)
+	{
+	   M[jdim][0][I][J] = 0;
+	   M[jdim][1][I][J] = 0;
+	   M[jdim][2][I][J] = 0;
+	}
+	
 	if (I != J)
 	{
 	  for (int i=0; i<fg_num; i++)
