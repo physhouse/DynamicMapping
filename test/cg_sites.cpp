@@ -32,7 +32,7 @@ void Cg_sites::init()
 
   L = fg_atoms->L;
   int nperdim = (int)cbrt((double)cg_num);
-  rcut = 0.7 * L / nperdim;
+  rcut = 0.7 * L / nperdim;  // Need to look at here!
 
   printf("fgnum = %d cgnum = %d L = %12.8lf rcut = %12.8lf\n", fg_atoms->fg_num, cg_num, L, rcut);
   //Grid Initialization of CG particle positions
