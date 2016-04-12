@@ -59,11 +59,18 @@ void Matrix_M::generate_M()
    double**   W     = matrix_C->W;
    double*    w_sum = matrix_C->w_sum;
    double     L     = fg_atoms->L;
+   double     rcut  = cg_sites->rcut;
 
    for (int I=0; I<cg_num; I++)
    {
       for (int J=0; J<cg_num; J++)
       {
+	    for (int jdim = 0; jdim < 3; jdim++)
+	    {
+	      M[jdim][0][I][J] = 0.0;
+	      M[jdim][1][I][J] = 0.0;
+	      M[jdim][2][I][J] = 0.0;
+	    }	
 	if (I != J)
 	{
 	  for (int i=0; i<fg_num; i++)
@@ -81,9 +88,9 @@ void Matrix_M::generate_M()
 	      double b_x = dw[J][j][0] / w_sum[j];
 	      double b_y = dw[J][j][1] / w_sum[j];
 	      double b_z = dw[J][j][2] / w_sum[j];
-	      numer_x += a*b_x;
-	      numer_y += a*b_y;
-	      numer_z += a*b_z;
+	      numer_x += a * b_x;
+	      numer_y += a * b_y;
+	      numer_z += a * b_z;
 	      denom += a;
 	    }
 
@@ -106,21 +113,22 @@ void Matrix_M::generate_M()
 	    double dcdx, dcdy, dcdz;
 	    if (W[I][i] < 1E-50)
 	    {
-	       double r_Ii = distance(R[I], r[i]);
+ 	       double rc2 = rcut * rcut;
+	       //double deriv = 1.0 + tanh(r_Ii - rcut);
 	       double rdim = R[I][0] - r[i][0];
 	       if (rdim > 0.5 * L) rdim -= L;
 	       else if (rdim < -0.5 * L) rdim += L;
-	       dcdx = -2.0 * rdim / r_Ii - dw[I][i][0] / w_sum[i];
+	       dcdx = -2.0 * rdim / rc2 - dw[I][i][0] / w_sum[i];
 
 	       rdim = R[I][1] - r[i][1];
 	       if (rdim > 0.5 * L) rdim -= L;
 	       else if (rdim < -0.5 * L) rdim += L;
-	       dcdy = -2.0 * rdim / r_Ii - dw[I][i][1] / w_sum[i];
+	       dcdy = -2.0 * rdim / rc2 - dw[I][i][1] / w_sum[i];
 
 	       rdim = R[I][2] - r[i][2];
 	       if (rdim > 0.5 * L) rdim -= L;
 	       else if (rdim < -0.5 * L) rdim += L;
-	       dcdz = -2.0 * rdim / r_Ii - dw[I][i][2] / w_sum[i];
+	       dcdz = -2.0 * rdim / rc2 - dw[I][i][2] / w_sum[i];
 	    }
 	    else
 	    {

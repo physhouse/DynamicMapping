@@ -26,7 +26,8 @@ double Matrix_C::w_Ij(double* R, double* r)
 
 double Matrix_C::weight(double r)
 {
-   return 0.5 - 0.5 * tanh(r-rcut);
+   double r0 = r / rcut;
+   return exp(- r0 * r0);
 }
 
 void Matrix_C::weight_deriv(double* R, double* r, double* dw_vec)
@@ -40,8 +41,8 @@ void Matrix_C::weight_deriv(double* R, double* r, double* dw_vec)
       else distance += r_dim * r_dim;
    }
 
-   double tanhr = tanh(distance - rcut);
-   double dwdr = - 0.5 * (1 - tanhr * tanhr);
+   double r0 = distance / rcut;
+   double dwdr = - 2.0 * (r0 / rcut) * exp(-r0 * r0);
    
    for (int idim = 0; idim < 3; idim++)
    {
@@ -49,7 +50,7 @@ void Matrix_C::weight_deriv(double* R, double* r, double* dw_vec)
      if (r_dim > 0.5 * L) r_dim -= L;
      else if (r_dim < -0.5 * L) r_dim += L;
 
-     dw_vec[0] = dwdr * r_dim / distance;
+     dw_vec[idim] = dwdr * r_dim / distance;
    }
    //printf("dw : %lf   %lf   %lf\n", dw_vec[0], dw_vec[1], dw_vec[2]);
 }

@@ -172,12 +172,12 @@ void Engine::matrixSolver()
    double alpha, beta;
    int m,n,lda,incx,incy;
   
-   order = CblasColMajor;
+   order = CblasRowMajor;
    transa = CblasNoTrans;
 
    m = 3 * cg_num;
    n = 3 * fg_num;
-   lda = m;
+   lda = n;
    incx = 1;
    incy = 1;
    alpha = 1.0;
@@ -186,7 +186,7 @@ void Engine::matrixSolver()
    double* B = new double[m * n];
    for (int i=0; i<m; i++)
    {
-      for (int j=0; j<m; j++)
+      for (int j=0; j<n; j++)
       {
 	B[i * lda + j] = MFG[i][j];
 	//printf("%f\n", MFG[i][j]);
@@ -202,6 +202,7 @@ void Engine::matrixSolver()
    printf("passing cblas\n");
    //for (int i=0; i<m; i++) printf("V_CG[%d] = %f\n", i+1, V_CG[i]);
    //Solving Linear Equations MCG*V=y using lapacke
+   lda = m;
    int size_a = m * m;
    double* A = new double[size_a];
    for (int i=0; i<m; i++)
@@ -212,14 +213,18 @@ void Engine::matrixSolver()
       }
    }
 
-   lda = m;
    int ldb = 1;
    int nrhs = 1;
    int ipiv[m];
 
+   printf("entering lapacke\n");
    int info = LAPACKE_dgesv(LAPACK_ROW_MAJOR, m, nrhs, A, lda, ipiv, V_CG, ldb);
-   if (info != 0) exit(-1);
-   
+   if (info != 0) 
+   {
+      printf("Error solving matrix equation (1-M) V = (C + N) v, singularity in matrix,  terminating\n");
+      exit(-1);
+   }
+
    delete[] A;
    printf("passing lapacke\n");
 }

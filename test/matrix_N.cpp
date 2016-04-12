@@ -62,6 +62,7 @@ void Matrix_N::generate_N()
    double*    w_sum  = matrix_C->w_sum;
    double**   dw_sum = matrix_C->dw_sum;
    double     L	     = fg_atoms->L;
+   double     rcut   = cg_sites->rcut;
 
    // Notation dcdr[dim][I][j][i] = /partial C_I_i /partial r_dim_j
    for (int I=0; I<cg_num; I++)
@@ -99,21 +100,22 @@ void Matrix_N::generate_N()
 
 	    if (W[I][i] < 1E-50)
 	    {
-	      double r_Ii = distance(R[I], r[i]);	
+	      double rc2 = rcut * rcut;
+	      //double deriv = 1.0 + tanh(r_Ii - rcut);
               double rdim = r[i][0] - R[I][0];
               if (rdim > 0.5 * L) rdim -= L; 
               else if (rdim < -0.5 * L) rdim += L;
-	      dcdx_diagonal = -2.0 * rdim / r_Ii + dw_sum[i][0] / w_sum[i] + dcdx;
+	      dcdx_diagonal = -2.0 * rdim / rc2 + dw_sum[i][0] / w_sum[i] + dcdx;
 
               rdim = r[i][1] - R[I][1];
               if (rdim > 0.5 * L) rdim -= L; 
               else if (rdim < -0.5 * L) rdim += L;
-	      dcdy_diagonal = -2.0 * rdim / r_Ii + dw_sum[i][1] / w_sum[i] + dcdy;
+	      dcdy_diagonal = -2.0 * rdim / rc2 + dw_sum[i][1] / w_sum[i] + dcdy;
 
               rdim = r[i][2] - R[I][2];
               if (rdim > 0.5 * L) rdim -= L; 
               else if (rdim < -0.5 * L) rdim += L;
-	      dcdz_diagonal = -2.0 * rdim / r_Ii + dw_sum[i][2] / w_sum[i] + dcdz;
+	      dcdz_diagonal = -2.0 * rdim / rc2 + dw_sum[i][2] / w_sum[i] + dcdz;
 	    }
             else
 	    {	
