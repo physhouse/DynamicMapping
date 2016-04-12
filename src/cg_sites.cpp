@@ -34,6 +34,7 @@ void Cg_sites::init()
   int nperdim = (int)cbrt((double)cg_num);
   rcut = 0.5 * L / nperdim;
 
+  printf("fgnum = %d cgnum = %d L = %12.8lf rcut = %12.8lf\n", fg_atoms->fg_num, cg_num, L, rcut);
   //Grid Initialization of CG particle positions
   double size_block = L / nperdim;
   for (int i=0; i<nperdim; i++)
@@ -46,9 +47,8 @@ void Cg_sites::init()
 	 R[ind][2] = (k+0.5) * size_block;
       }
 
-  firstMapping();
   cgtrj.open("CG_TRJ.lmpstrj", std::ofstream::out);
-  output();
+  cgtrj<<"CG_TRJ : Dynamical Mapping Coarse Graining"<<std::endl;
 }
 
 void Cg_sites::cleanup()
@@ -103,7 +103,7 @@ void Cg_sites::firstMapping()
 	  R[i][1] += mapMatrix[i][j] * r[j][1];
 	  R[i][2] += mapMatrix[i][j] * r[j][2];
        }
-
+       //printf("R = %12.8lf, before = %12.8lf\n", R[i][0], ri0);
        error += (R[i][0] - ri0)*(R[i][0] -ri0) + (R[i][1] - ri1)*(R[i][1] - ri1) + (R[i][2] - ri2)*(R[i][2] - ri2);
     }
     

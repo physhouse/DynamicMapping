@@ -42,9 +42,16 @@ void Matrix_C::weight_deriv(double* R, double* r, double* dw_vec)
 
    double tanhr = tanh(distance - rcut);
    double dwdr = - 0.5 * (1 - tanhr * tanhr);
-   dw_vec[0] = dwdr * (R[0] - r[0]) / distance;
-   dw_vec[1] = dwdr * (R[1] - r[1]) / distance;
-   dw_vec[2] = dwdr * (R[2] - r[2]) / distance;
+   
+   for (int idim = 0; idim < 3; idim++)
+   {
+     double r_dim = R[idim] - r[idim];
+     if (r_dim > 0.5 * L) r_dim -= L;
+     else if (r_dim < -0.5 * L) r_dim += L;
+
+     dw_vec[idim] = dwdr * r_dim / distance;
+   }
+   //printf("dw : %lf   %lf   %lf\n", dw_vec[0], dw_vec[1], dw_vec[2]);
 }
 
 // Initialization
@@ -83,6 +90,8 @@ void Matrix_C::init()
 
    L    = fg_atoms->L;
    rcut = cg_sites->rcut;
+
+   compute(); 
 }
 
 //cleanup
@@ -115,7 +124,6 @@ void Matrix_C::matrixGenerator()
 	W[i][j] = w_Ij(R[i],r[j]);
         weight_deriv(R[i], r[j], dw[i][j]);
     }
-
    // Generating the w_sum matrix
    for (int i=0; i<fg_num; i++)
    {
@@ -124,9 +132,9 @@ void Matrix_C::matrixGenerator()
      for (int j=0; j<cg_num; j++) 
      {
 	w_sum[i] += W[j][i];
-	dw_sum[i][0] += dw[i][j][0];
-	dw_sum[i][1] += dw[i][j][1];
-	dw_sum[i][2] += dw[i][j][2];
+	dw_sum[i][0] += dw[j][i][0];
+	dw_sum[i][1] += dw[j][i][1];
+	dw_sum[i][2] += dw[j][i][2];
      }
    }
    
@@ -140,7 +148,10 @@ void Matrix_C::matrixGenerator()
 	norm   += C[i][j];
      }
     
-     for (int j=0; j<fg_num; j++) C[i][j] /= norm;
+     for (int j=0; j<fg_num; j++) 
+     {
+	C[i][j] /= norm;
+     }
    }
 }
 

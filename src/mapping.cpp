@@ -28,10 +28,10 @@ void Mapping::init(int narg, char **arg)
 {
   fg_atoms->init(narg, arg);
   cg_sites->init();
+  engine->init();
   matrix_C->init();
   matrix_M->init();
   matrix_N->init();
-  engine->init();
 }
 
 void Mapping::exec()
@@ -41,10 +41,10 @@ void Mapping::exec()
 
 void Mapping::destroy()
 {
+  delete engine;
   delete fg_atoms;
   delete cg_sites;
-  delete matrix_C;
   delete matrix_M;
   delete matrix_N;
-  delete engine;
+  delete matrix_C;
 }

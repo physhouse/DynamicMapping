@@ -10,6 +10,7 @@ public:
    ~Matrix_N();
    void init();
    void generate_N();
+   double distance(double*, double*);
    void compute();
    void cleanup();
 

@@ -1,17 +1,26 @@
 #include "comm.h"
+#include <iostream>
 #include "fg_atoms.h"
 #include "mapping.h"
 #include <cstring>
 #include <fstream>
 #include "pointers.h"
+#include "assert.h"
 
-Fg_atoms::Fg_atoms(Mapping* map) : Pointers(map) {}
+
+Fg_atoms::Fg_atoms(Mapping* map) : Pointers(map) 
+{
+  input = new FrameSource();
+}
 
 void Fg_atoms::init(int argc, char** argv)
 {
    nframes = atoi(argv[2]);
    
-   sscanf(argv[1], "%s", input->trajName);
+   assert(argv[1] != NULL);
+
+   strcpy(input->trajName, argv[1]);
+
    input->trajectory.open(input->trajName, std::ifstream::in); 
    if (input->trajectory.fail())
    {
@@ -179,7 +188,7 @@ void Fg_atoms::readLammpsBody()
 
       for (j=0; j<3; j++)
       {
-	 v[i + j*fg_num] = atof(input->elements[j + input->x_pos].c_str());
+	 v[i + j*fg_num] = atof(input->elements[j + input->v_pos].c_str());
       }
     
    }
@@ -198,6 +207,7 @@ int Fg_atoms::stringSplit(std::string source, const char *const delimiter, std::
 	  results[count] = source.substr(prev, next - prev);
 	  count++;
 	}
+	prev = next + 1;
    }
 
    if (prev < source.size())  //something left, the last elements may end up without space or tab
@@ -213,3 +223,4 @@ void Fg_atoms::finishReading()
    input->trajectory.close();
    delete[] input->elements;
 }
+
