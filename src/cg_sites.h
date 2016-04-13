@@ -8,23 +8,23 @@
 class Cg_sites : protected Pointers
 {
 public:
-   Cg_sites(class Mapping*);
-   ~Cg_sites();
-   void init();
-   void firstMapping();
-   void output();
-   void cleanup();
+    Cg_sites(class Mapping *);
+    ~Cg_sites();
+    void init();
+    void firstMapping();
+    void output();
+    void cleanup();
 
-   double	L;
-   double	rcut;
-   int		cg_num;
-   double	timestep;
-   double	tol;  //tolerance for the initial mapping
-   int		niter;  //Rounds of Iteration
+    double   L;
+    double   rcut;
+    int      cg_num;
+    double   timestep;
+    double   tol;  //tolerance for the initial mapping
+    int      niter;  //Rounds of Iteration
 
-   double**	R;
-   double*	V;
-   std::ofstream cgtrj;
+    double **R;
+    double  *V;
+    std::ofstream cgtrj;
 };
 
 #endif

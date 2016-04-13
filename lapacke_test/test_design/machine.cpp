@@ -5,18 +5,18 @@
 
 Machine::Machine()
 {
-  ma = new A(this);
-  mb = new B(this);
+    ma = new A(this);
+    mb = new B(this);
 }
 
 void Machine::init()
 {
-  ma->init();
-  mb->init();
+    ma->init();
+    mb->init();
 }
 
 void Machine::exec()
 {
-  ma->exec();
-  mb->exec();
+    ma->exec();
+    mb->exec();
 }

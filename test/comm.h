@@ -15,8 +15,8 @@
 
 #define VAR_END else {ff=false;} if(ff) printf("%s = %s\n", line, p);} fclose(varfile); printf("\n"); }
 
-#define GET_INT(key)	else if(strcmp(line,#key)==0) { key = atoi(p); }
-#define GET_REAL(key)	else if(strcmp(line,#key)==0) { key = atof(p); }
-#define GET_STRING(key)	else if(strcmp(line,#key)==0) { strcpy(key,p); }
+#define GET_INT(key)    else if(strcmp(line,#key)==0) { key = atoi(p); }
+#define GET_REAL(key)   else if(strcmp(line,#key)==0) { key = atof(p); }
+#define GET_STRING(key) else if(strcmp(line,#key)==0) { strcpy(key,p); }
 
 #endif

@@ -2,8 +2,8 @@
 
 int main()
 {
-  Machine* m = new Machine();
-  m->init();
-  m->exec();
-  return 0;
+    Machine *m = new Machine();
+    m->init();
+    m->exec();
+    return 0;
 }
