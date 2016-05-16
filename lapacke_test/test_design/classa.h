@@ -5,10 +5,10 @@
 class A : public Base
 {
 public:
-  A(class Machine* m);
-  void  init();
-  void  exec();
-  int entry;
+    A(class Machine *m);
+    void  init();
+    void  exec();
+    int entry;
 };
 
 #endif

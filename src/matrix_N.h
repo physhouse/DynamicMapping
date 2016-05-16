@@ -6,17 +6,17 @@
 class Matrix_N : protected Pointers
 {
 public:
-   Matrix_N(class Mapping *);
-   ~Matrix_N();
-   void init();
-   void generate_N();
-   double distance(double*, double*);
-   void compute();
-   void cleanup();
+    Matrix_N(class Mapping *);
+    ~Matrix_N();
+    void init();
+    void generate_N();
+    double distance(double *, double *);
+    void compute();
+    void cleanup();
 
-   double****	N;	// N matrix, dim * dim * cg * fg
-   int		cg_num;
-   int		fg_num;
+    double **   **N; // N matrix, dim * dim * cg * fg
+    int      cg_num;
+    int      fg_num;
 };
 
 #endif

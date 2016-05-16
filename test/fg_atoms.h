@@ -4,40 +4,41 @@
 #include <fstream>
 #include "pointers.h"
 
-struct FrameSource {
-  std::ifstream trajectory;
-  char trajName[1024];
-  int header_size;
-  int x_pos;
-  int v_pos;
-  int type_pos;
-  std::string* elements;
+struct FrameSource
+{
+    std::ifstream trajectory;
+    char trajName[1024];
+    int header_size;
+    int x_pos;
+    int v_pos;
+    int type_pos;
+    std::string *elements;
 };
 
 class Fg_atoms : protected Pointers
 {
 public:
-   Fg_atoms(class Mapping* map);
-   void init(int argc, char** argv);
-   void readInitialFrame();
-   void readNextFrame();
-   void readFinalFrame();
-  
-   //helper functions
-  
-   void readLammpsHeader();
-   void readLammpsBody();
-   int  stringSplit(std::string, const char*, std::string*);
-   void finishReading();
-   void cleanup();
+    Fg_atoms(class Mapping *map);
+    void init(int argc, char **argv);
+    void readInitialFrame();
+    void readNextFrame();
+    void readFinalFrame();
 
-   double	L;
-   int		fg_num;
-   int		nframes; //Number of frames in the trajectory
-   double**	r;
-   double*	v;
-   double	currentStep;
-   FrameSource* input;
+    //helper functions
+
+    void readLammpsHeader();
+    void readLammpsBody();
+    int  stringSplit(std::string, const char *, std::string *);
+    void finishReading();
+    void cleanup();
+
+    double   L;
+    int      fg_num;
+    int      nframes; //Number of frames in the trajectory
+    double **r;
+    double  *v;
+    double   currentStep;
+    FrameSource *input;
 };
 
 #endif

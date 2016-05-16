@@ -1,7 +1,5 @@
 # DynamicMapping
 
-The code in src files should not be used yet, still being tested
-
 build:
 
 cd test/
