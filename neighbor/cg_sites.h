@@ -10,7 +10,7 @@ class Cg_sites : protected Pointers
 public:
    Cg_sites(class Mapping*);
    ~Cg_sites();
-   void init();
+   void init(int argc, char** argv);
    void firstMapping();
    void output();
    void cleanup();

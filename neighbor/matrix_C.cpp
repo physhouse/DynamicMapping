@@ -54,6 +54,7 @@ void Matrix_C::weight_deriv(double* R, double* r, double* dw_vec)
      dw_vec[idim] = dwdr * r_dim / distance;
    }
    //printf("dw : %lf   %lf   %lf\n", dw_vec[0], dw_vec[1], dw_vec[2]);
+
 }
 
 // Initialization
@@ -105,7 +106,7 @@ void Matrix_C::init()
      F[i] = M0;
    }
 
-   //matrixGenerator();
+   matrixGenerator();
    compute();
 }
 
@@ -227,7 +228,7 @@ void Matrix_C::weightsVarying_deriv(double* R, double* r, double* dw_vec, double
    }
 
    double em = exp(12.0 * (M0 - M) / M0);
-   double sigma = 1.50 * rcut * em / (1.0 + em) + 0.50 * rcut;
+   double sigma = 1.00 * rcut * em / (1.0 + em) + 0.50 * rcut;
    double r0 = distance / sigma;
    double dwdr = - 2.0 * (r0 / sigma) * exp(-r0 * r0);
    
@@ -252,35 +253,42 @@ double Matrix_C::generateWeights()
   int**    fgList = neighbor->fgList;
 
   double error = 0.0;
-  double alpha = 0.10;
+  double alpha = 0.05;
+
   for (int I=0; I<cg_num; I++)
   {
      //printf("%d --- %d\n", I, numNeighbors[I]);
+     //printf("%d --- %e\n", I, W[1][3401]);
      for (int i=0; i<numNeighbors[I]; i++)
      {
 	int index = list[I][i];
+	//printf("p : %d\n", index);
 	double temp = W[I][index];
+	//printf("%d\n", index);
 	W[I][index] = (1.0 - alpha) * temp + alpha * weightsVarying(R[I], r[index], F[I]);
 	error += (W[I][index] - temp) * (W[I][index] - temp);
 
-	weightsVarying_deriv(R[I], r[index], dw[I][index], F[I], alpha);
+	//weightsVarying_deriv(R[I], r[index], dw[I][index], F[I], alpha);
      }
   }
   //printf("phase I\n");
+  double test_sum = 0.0;
   for (int i=0; i<fg_num; i++)
   {
      w_sum[i] = 0.0;
-     dw_sum[i][0] = 0.0; dw_sum[i][1] = 0.0; dw_sum[i][2] = 0.0;
+     //dw_sum[i][0] = 0.0; dw_sum[i][1] = 0.0; dw_sum[i][2] = 0.0;
      for (int j=0; j<numFgNeighbors[i]; j++)
      {
 	int index = fgList[i][j];
         w_sum[i] += W[index][i];
-        dw_sum[i][0] += dw[index][i][0];
-        dw_sum[i][1] += dw[index][i][1];
-        dw_sum[i][2] += dw[index][i][2];
+        //dw_sum[i][0] += dw[index][i][0];
+        //dw_sum[i][1] += dw[index][i][1];
+        //dw_sum[i][2] += dw[index][i][2];
      }
+     test_sum += w_sum[i];
+     //printf("wsum %d : %e\n", i+1, w_sum[i]);
   }
-  //printf("phase II\n");
+  //printf("phase II, ave_sum = %12.8lf\n", test_sum / (double)fg_num);
 
   return sqrt(error); 
 }
@@ -346,6 +354,16 @@ void Matrix_C::iterateSolver()
   double threshold = 1e-10;
   int	 niter = 1000;
 
+  double**   r     = fg_atoms->r;
+  double**   R     = cg_sites->R;
+  double***  dw    = matrix_C->dw;
+  double**   dw_sum = matrix_C->dw_sum;
+
+  int*	    numNeighbors = neighbor->numNeighbors;
+  int*	    numFgNeighbors = neighbor->numFgNeighbors;
+  int**     list = neighbor->list;
+  int**     fgList = neighbor->fgList;
+
   for (int i=0; i<niter; i++)
   {
     error = generateWeights();
@@ -354,10 +372,33 @@ void Matrix_C::iterateSolver()
    
     if (error < threshold)
     {
-      //printf("converged!\n");
+      printf("converged!\n");
       break;
     }
     //printf("step %d error = %12.8lf m0 = %12.8lf\n", i, error, M0);
+  }
+
+  for (int I=0; I<cg_num; I++)
+  {
+     //printf("%d --- %d\n", I, numNeighbors[I]);
+     for (int i=0; i < numNeighbors[I]; i++)
+     {
+	int index = list[I][i];
+	weightsVarying_deriv(R[I], r[index], dw[I][index], F[I], 1.0);
+     }
+  }
+
+  //printf("phase I\n");
+  for (int i=0; i<fg_num; i++)
+  {
+     dw_sum[i][0] = 0.0; dw_sum[i][1] = 0.0; dw_sum[i][2] = 0.0;
+     for (int j=0; j < numFgNeighbors[i]; j++)
+     {
+	int index = fgList[i][j];
+        dw_sum[i][0] += dw[index][i][0];
+        dw_sum[i][1] += dw[index][i][1];
+        dw_sum[i][2] += dw[index][i][2];
+     }
   }
 }
 

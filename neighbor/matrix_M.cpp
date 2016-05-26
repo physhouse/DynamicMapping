@@ -113,7 +113,7 @@ void Matrix_M::generate_M()
 	    int i = list[I][ii];
 	    double dcdx, dcdy, dcdz;
 
- 	    double rc2 = rcut * rcut;
+ 	    /*double rc2 = rcut * rcut;
 	    //double deriv = 1.0 + tanh(r_Ii - rcut);
 	    double rdim = R[I][0] - r[i][0];
 	    if (rdim > 0.5 * L) rdim -= L;
@@ -128,22 +128,30 @@ void Matrix_M::generate_M()
 	    rdim = R[I][2] - r[i][2];
 	    if (rdim > 0.5 * L) rdim -= L;
 	    else if (rdim < -0.5 * L) rdim += L;
-	    dcdz = -2.0 * rdim / rc2 - dw[I][i][2] / w_sum[i];
+	    dcdz = -2.0 * rdim / rc2 - dw[I][i][2] / w_sum[i];*/
 
+	    dcdx = dw[I][i][0] / W[I][i] - dw[I][i][0] / w_sum[i];
+	    dcdy = dw[I][i][1] / W[I][i] - dw[I][i][1] / w_sum[i];
+	    dcdz = dw[I][i][2] / W[I][i] - dw[I][i][2] / w_sum[i];
+
+	    //printf("%e %e %e\n", dcdx,dcdy,dcdz);
+	    //printf("%e %e %e\n", dw[I][i][0], W[I][i], w_sum[i]);
 	    double sumx = 0.0, sumy = 0.0, sumz = 0.0;
 
 	    for (int index=0; index<numNeighbors[I]; index++)
 	    {
 	      int j = list[I][index];
 
-	      sumx += dw[I][j][0] / W[I][j] - dw[I][j][0] / w_sum[j];
-	      sumy += dw[I][j][1] / W[I][j] - dw[I][j][1] / w_sum[j];
-	      sumz += dw[I][j][2] / W[I][j] - dw[I][j][2] / w_sum[j];
+	      sumx += C[I][j] * (dw[I][j][0] / W[I][j] - dw[I][j][0] / w_sum[j]);
+	      sumy += C[I][j] * (dw[I][j][1] / W[I][j] - dw[I][j][1] / w_sum[j]);
+	      sumz += C[I][j] * (dw[I][j][2] / W[I][j] - dw[I][j][2] / w_sum[j]);
 	    }
 
 	    dcdx -= sumx;
-	    dcdz -= sumy;
-	    dcdy -= sumz;
+	    dcdy -= sumy;
+	    dcdz -= sumz;
+
+	    //printf("%e %e %e\n", dcdx,dcdy,dcdz);
 
 	    for (int jdim = 0; jdim < 3; jdim++)
 	    {
@@ -164,14 +172,10 @@ void Matrix_M::generate_M()
    {
       for (int j=0; j<cg_num; j++)
       {
-	printf("%12.5lf", M[0][0][i][j]);
+	printf("%12.8lf\t", M[0][0][i][j]);
       }
       printf("\n");
    }*/
-
-   /*printf("Testing Mapping...\n");
-   for (int i=0; i<fg_num; i++)
-       printf("%12.8lf\n", w_sum[i]);*/
 
    /*printf("Testing Mass...\n");
    double* sum_c = new double[fg_num];

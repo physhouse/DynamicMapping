@@ -12,7 +12,7 @@ Neighbor::~Neighbor() { cleanup(); }
 void Neighbor::init()
 {
    cg_num = cg_sites->cg_num;
-   maxNeighbors = fg_atoms->fg_num / 4;
+   maxNeighbors = fg_atoms->fg_num;
 
    numNeighbors = new int[cg_num];
    memset(numNeighbors, 0, sizeof(int) * cg_num);
@@ -40,6 +40,8 @@ void Neighbor::init()
 
    cellList = new int[fg_atoms->fg_num];
    cellHead = new int[numCells];
+   memset(cellList, 0, sizeof(int) * fg_atoms->fg_num);
+   memset(cellHead, 0, sizeof(int) * numCells);
 
    buildCellList();
    buildNeighborList();
@@ -68,28 +70,37 @@ void Neighbor::buildCellList()
    for (int i=0; i<fg_atoms->fg_num; i++)
    {
       int cellIndex = atom2Cell(fg_atoms->r[i]);
+      if (cellIndex > numCells)
+	 printf("%d : Warning!, positions %12.8lf %12.8lf %12.8lf L - %12.8lf\n", i, fg_atoms->r[i][0], fg_atoms->r[i][1], fg_atoms->r[i][2], fg_atoms->L);
       cellList[i] = cellHead[cellIndex];
       cellHead[cellIndex] = i;
    }
-
+   printf("CellList Finished\n");
 }
 
 /* scanning the stencil of cells to generate NN */
 void Neighbor::buildNeighborList()
 {
-   memset(numNeighbors, 0, sizeof(int) * cg_num);
+   //memset(numNeighbors, 0, sizeof(int) * cg_num);
    for (int i=0; i<cg_num; i++)
    {
-      memset(list[i], 0, sizeof(int) * maxNeighbors);
+      numNeighbors[i] = 0;
+      for (int j=0; j<maxNeighbors; j++)
+	 list[i][j] = -1;
+      //memset(list[i], 0, sizeof(int) * maxNeighbors);
    }
 
-   memset(numFgNeighbors, 0, sizeof(int) * fg_atoms->fg_num);
+   //memset(numFgNeighbors, 0, sizeof(int) * fg_atoms->fg_num);
    for (int i=0; i<fg_atoms->fg_num; i++)
    {
-      memset(fgList[i], 0, sizeof(int) * cg_num);
+      numFgNeighbors[i] = 0;
+      for (int j=0; j<cg_num; j++)
+	 fgList[i][j] = -1;
+      //memset(fgList[i], 0, sizeof(int) * cg_num);
    }
 
    // Build Double Neighbor List from Cell List
+   int sumg = 0;
    for (int i=0; i<cg_num; i++)
    {
       int cellIndex = atom2Cell(cg_sites->R[i]);
@@ -128,17 +139,39 @@ void Neighbor::buildNeighborList()
       }
 
       numNeighbors[i] = count;
-      //printf("size:%d %d\n", i, count);
-      /*printf("%d: %d (%d,%d,%d)", i, dimCell, x, y, z);
+      sumg += count;
+      /*printf("size:%d %d\n", i, count);
+      printf("%d: %d (%d,%d,%d)", i, dimCell, x, y, z);
       for (int k=0; k<count; k++)
         printf("%d ", list[i][k]);
       printf("\n");*/
+   }
+
+   int sumf = 0;
+   for (int i=0; i<fg_atoms->fg_num; i++)
+   {
+     sumf += numFgNeighbors[i];
+     /*printf("Atom %d : ", i+1);
+     for (int j=0; j<numFgNeighbors[i]; j++)
+	printf("%d ", fgList[i][j]);
+     printf("\n");*/
    }
 }
 
 // Helper functions
 int Neighbor::atom2Cell(double* r)
 {
+   double L = fg_atoms->L;
+   double eps = 1e-5;
+   if (r[0] + eps > L) r[0] -= L;
+   else if (r[0] + eps < 0) r[0] += L;
+
+   if (r[1] + eps > L) r[1] -= L;
+   else if (r[1] + eps < 0) r[1] += L;
+
+   if (r[2] + eps > L) r[2] -= L;
+   else if (r[2] + eps < 0) r[2] += L;
+
    int x = r[0] / cellLength;
    int y = r[1] / cellLength;
    int z = r[2] / cellLength;

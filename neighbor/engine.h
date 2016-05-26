@@ -8,7 +8,7 @@ class Engine : protected Pointers
 public:
   Engine(class Mapping *);
   ~Engine();
-  void init();
+  void init(int argc);
 
   void update();
   void exec();
@@ -27,6 +27,7 @@ private:
   int     cg_num;
   int	  fg_num;
   int	  nsteps;
+  bool    restartFlag;
 };
 
 #endif

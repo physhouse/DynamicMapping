@@ -2,7 +2,7 @@ LIBLAPACKPATH = /project/gavoth/ynhan/local/lapack-3.5.0/
 LAPACKEPATH = /project/gavoth/ynhan/local/lapack-3.5.0/lapacke/include
 CBLASPATH = /project/gavoth/ynhan/local/CBLAS/include
 LIBCBLAS = /project/gavoth/ynhan/local/CBLAS/lib/
-OPT = -O3 -Wall
+OPT = -O3 -Wall -g
 
 CFLAGS = -I$(LAPACKEPATH) -I$(CBLASPATH)
 LDFLAGS = -L$(LIBLAPACKPATH) -L$(LIBCBLAS)

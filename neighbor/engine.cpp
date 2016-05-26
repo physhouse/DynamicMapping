@@ -19,8 +19,11 @@ Engine::Engine(Mapping* map) : Pointers(map) {}
 Engine::~Engine() {cleanup();}
 
 //Initilization
-void Engine::init()
+void Engine::init(int argc)
 {
+  if (argc > 3) restartFlag = true;
+  else restartFlag = false;
+
   nsteps = fg_atoms->nframes;
   fg_num = fg_atoms->fg_num;
   cg_num = cg_sites->cg_num;
@@ -54,16 +57,6 @@ void Engine::cleanup()
   delete[] MFG;
 }
 
-//Update Velocity for one frame
-void Engine::update()
-{
-   initFrame();
-   buildNeighbors();
-   matrixSolver();
-   integrate();
-   endOfFrame();
-}
-
 void Engine::buildNeighbors()
 {
    std::clock_t start;
@@ -77,16 +70,31 @@ void Engine::buildNeighbors()
    printf("cell: %12.8lf  neighbor: %12.8lf\n ncells %d\n", cellTime, allTime-cellTime, neighbor->dimCell);
 }
 
+//Update Velocity for one frame
+void Engine::update()
+{
+   initFrame();
+   matrixSolver();
+   integrate();
+   endOfFrame();
+}
+
 void Engine::exec()
 {
    printf("nsteps = %d\n", nsteps);
-   buildNeighbors();
-   cg_sites->firstMapping();
-   endOfFrame();
+
+   if (!restartFlag)
+   {
+     cg_sites->firstMapping();
+     endOfFrame();
+   }
+
    //cg_sites->output();
    for (int i=0; i<nsteps-1; i++)
    {
       update();
+      if (i % 3 == 0)
+        buildNeighbors();
    }
    // The last frame, not loading
    initFrame();
@@ -123,7 +131,6 @@ void Engine::initFrame()
         {
            double deltaij = (i==j)? 1.0 : 0.0;
 	   MCG[i][j] = deltaij - M[idim][jdim][i - offset_d1][j - offset_d2];
-	   //printf("CG %f\n",MCG[i][j]);
         }
       }
       //MFG = C + V
@@ -134,7 +141,6 @@ void Engine::initFrame()
 	{
 	  double Cij = (idim == jdim)? C[i-offset_d1][j-offset_d2] : 0.0;
 	  MFG[i][j] = Cij + N[idim][jdim][i - offset_d1][j - offset_d2];
-	  //printf("FG %f\n",MFG[i][j]);
         }
       }
     }

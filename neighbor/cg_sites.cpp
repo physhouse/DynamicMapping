@@ -4,6 +4,7 @@
 #include "matrix_C.h"
 #include "pointers.h"
 #include "comm.h"
+#include "assert.h"
 #include <cstdlib>
 #include <cstdio>
 #include <cmath>
@@ -11,7 +12,7 @@
 Cg_sites::Cg_sites(Mapping *map) : Pointers(map) {}
 Cg_sites::~Cg_sites() {cleanup();}
 
-void Cg_sites::init()
+void Cg_sites::init(int argc, char** argv)
 {
   VAR_BEGIN
     GET_INT(cg_num)
@@ -33,7 +34,7 @@ void Cg_sites::init()
   M = new double[cg_num];
   memset(M, 0, sizeof(double) * cg_num);
 
-  double M0 = 500.0/27.0; // hard coded! Need to be removed!
+  double M0 = (double)fg_atoms->fg_num / (double)cg_num; // hard coded! Need to be removed!
   for (int i=0; i<cg_num; i++)
     M[i] = M0;
 
@@ -43,16 +44,31 @@ void Cg_sites::init()
 
   printf("fgnum = %d cgnum = %d L = %12.8lf rcut = %12.8lf\n", fg_atoms->fg_num, cg_num, L, rcut);
   //Grid Initialization of CG particle positions
-  double size_block = L / nperdim;
-  for (int i=0; i<nperdim; i++)
-    for (int j=0; j<nperdim; j++)
-      for (int k=0; k<nperdim; k++)
-      {
-	 int ind = nperdim * nperdim * i + nperdim * j + k;
-	 R[ind][0] = (i+0.5) * size_block + 1.0 * rand()/RAND_MAX;
-	 R[ind][1] = (j+0.5) * size_block + 1.0 * rand()/RAND_MAX;
-	 R[ind][2] = (k+0.5) * size_block + 1.0 * rand()/RAND_MAX;
-      }
+  if (argc <= 3)
+  {
+    double size_block = L / nperdim;
+    for (int i=0; i<nperdim; i++)
+      for (int j=0; j<nperdim; j++)
+        for (int k=0; k<nperdim; k++)
+        {
+	   int ind = nperdim * nperdim * i + nperdim * j + k;
+	   R[ind][0] = (i+0.5) * size_block + 1.0 * rand()/RAND_MAX;
+	   R[ind][1] = (j+0.5) * size_block + 1.0 * rand()/RAND_MAX;
+	   R[ind][2] = (k+0.5) * size_block + 1.0 * rand()/RAND_MAX;
+        }
+  }
+  else  //read Data from restart files
+  {
+    assert(argv[4] != NULL);
+    int aid, mid;
+    FILE* fp = fopen(argv[4], "r+");
+    for (int i=0; i<cg_num; i++)
+    {
+      fscanf(fp, "%d %d %lf %lf %lf %lf", &aid, &mid, &M[i], &R[i][0], &R[i][1], &R[i][2]);
+    }
+    fclose(fp);
+    printf("Restart Parsing Finished\n");
+  }
 
   cgtrj.open("CG_TRJ.lmpstrj", std::ofstream::out);
   cgtrj<<"CG_TRJ : Dynamical Mapping Coarse Graining"<<std::endl;
@@ -121,7 +137,11 @@ void Cg_sites::firstMapping()
     if (error < tol) return;
     else
       matrix_C->compute();
-    if (round%2 == 0) printf("Round %d, error = %e\n", round, error);
+    if (round%2 == 0) 
+    {
+	printf("Round %d, error = %e\n", round, error);
+	//output();
+    }
   }
 }
 

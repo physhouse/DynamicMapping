@@ -29,8 +29,8 @@ Mapping::~Mapping()
 void Mapping::init(int narg, char **arg)
 {
   fg_atoms->init(narg, arg);
-  cg_sites->init();
-  engine->init();
+  cg_sites->init(narg, arg);
+  engine->init(narg);
   neighbor->init();
   matrix_C->init();
   matrix_M->init();

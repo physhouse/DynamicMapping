@@ -79,6 +79,8 @@ void Matrix_N::generate_N()
 	double dcdy = dw[I][j][1] / W[I][j] - dw_sum[j][1] / w_sum[j];
 	double dcdz = dw[I][j][2] / W[I][j] - dw_sum[j][2] / w_sum[j];
 
+	//printf("%e %e %e\n", dcdx,dcdy,dcdz);
+
 	for (int ii=0; ii<neighbor->numNeighbors[I]; ii++)
 	{
 	  int i = neighbor->list[I][ii];
@@ -89,9 +91,9 @@ void Matrix_N::generate_N()
 	    {
 	      /* Notation:: N[d1][d2][I][j], d1->dimension of CG particles, d2->dimension of FG particles 
  	       * N[d1][d2][I][j] = sumover(i){r_i_d1 * dC_I_i/dr_j_d2} */
-	      N[jdim][0][I][j] +=  C[I][i] * dcdx * r[i][jdim];
-	      N[jdim][1][I][j] +=  C[I][i] * dcdy * r[i][jdim];
-	      N[jdim][2][I][j] +=  C[I][i] * dcdz * r[i][jdim];
+	      N[jdim][0][I][j] +=  C[I][i] * C[I][j] * dcdx * r[i][jdim];
+	      N[jdim][1][I][j] +=  C[I][i] * C[I][j] * dcdy * r[i][jdim];
+	      N[jdim][2][I][j] +=  C[I][i] * C[I][j] * dcdz * r[i][jdim];
 	    }
 	  } 
 	  else
@@ -100,13 +102,15 @@ void Matrix_N::generate_N()
 	    {
 	      /* Notation:: N[d1][d2][I][j], d1->dimension of CG particles, d2->dimension of FG particles 
  	       * N[d1][d2][I][j] = sumover(i){r_i_d1 * dC_I_i/dr_j_d2} */
-	      N[jdim][0][I][j] +=  (C[I][i] - 1.0) * dcdx * r[i][jdim];
-	      N[jdim][1][I][j] +=  (C[I][i] - 1.0) * dcdy * r[i][jdim];
-	      N[jdim][2][I][j] +=  (C[I][i] - 1.0) * dcdz * r[i][jdim];
+	      N[jdim][0][I][j] +=  (C[I][i] - 1.0) * C[I][j] * dcdx * r[i][jdim];
+	      N[jdim][1][I][j] +=  (C[I][i] - 1.0) * C[I][j] * dcdy * r[i][jdim];
+	      N[jdim][2][I][j] +=  (C[I][i] - 1.0) * C[I][j] * dcdz * r[i][jdim];
 	    }
 	  }
         }
+        //printf("%12.8lf\t", N[0][0][I][j]);
      } 
+     //printf("\n");
    }
 }
 
