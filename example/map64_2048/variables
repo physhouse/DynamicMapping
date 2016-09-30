@@ -1,0 +1,5 @@
+cg_num=64
+tol=1.0E-20
+timestep=0.005
+niter=5000
+freq=500

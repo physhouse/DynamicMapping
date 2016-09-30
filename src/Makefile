@@ -2,18 +2,18 @@ LIBLAPACKPATH = /project/gavoth/ynhan/local/lapack-3.5.0/
 LAPACKEPATH = /project/gavoth/ynhan/local/lapack-3.5.0/lapacke/include
 CBLASPATH = /project/gavoth/ynhan/local/CBLAS/include
 LIBCBLAS = /project/gavoth/ynhan/local/CBLAS/lib/
-OPT = -O3 -Wall
+OPT = -O3 -Wall -g
 
 CFLAGS = -I$(LAPACKEPATH) -I$(CBLASPATH)
 LDFLAGS = -L$(LIBLAPACKPATH) -L$(LIBCBLAS)
 LIBS = -lblas -llapacke -llapack -lcblas -lgfortran
-CC = g++ $(OPT)
+CC = g++ $(OPT) -fopenmp
 
-mapping.x : main.o engine.o fg_atoms.o cg_sites.o matrix_C.o matrix_M.o matrix_N.o mapping.o
-	$(CC) -o mapping.x *.o $(LDFLAGS) $(LIBS)
+../test.x : test.o engine.o fg_atoms.o cg_sites.o matrix_C.o matrix_M.o matrix_N.o mapping.o neighbor.o
+	$(CC) -o ../test.x *.o $(LDFLAGS) $(LIBS)
 
-main.o : main.cpp
-	$(CC) -c main.cpp
+test.o : test.cpp
+	$(CC) -c test.cpp
 
 mapping.o : mapping.cpp
 	$(CC) -c mapping.cpp
@@ -35,6 +35,9 @@ matrix_M.o : matrix_M.cpp
 
 matrix_N.o : matrix_N.cpp
 	$(CC) -c matrix_N.cpp
+
+neighbor.o : neighbor.cpp
+	$(CC) -c neighbor.cpp
 
 clean :
 	rm *.o
