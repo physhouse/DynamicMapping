@@ -1,7 +1,0 @@
-#!/bin/bash
-
-#SBATCH --job-name=NN_C
-#SBATCH --ntasks=1
-#SBATCH --output=JOB.OUT
-
-./test.x trj.in.restart 15000 -r cg.in
