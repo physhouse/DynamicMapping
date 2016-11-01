@@ -5,5 +5,5 @@
 #SBATCH --output=JOB.OUT
 
 export OMP_NUM_THREADS=8
-./test.x ../dump.lj.ld 500000 -r cg.in 296476
+./test.x ../dump.lj.ld 1000000
 
