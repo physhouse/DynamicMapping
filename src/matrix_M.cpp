@@ -84,7 +84,7 @@ void Matrix_M::generate_M()
 	    double dcdy = -dw[J][i][1] / w_sum[i];
 	    double dcdz = -dw[J][i][2] / w_sum[i];
 
-	    double sumx = 0.0, sumy = 0.0, sumz = 0.0;
+	    /*double sumx = 0.0, sumy = 0.0, sumz = 0.0;
 
 	    for (int index=0; index<numNeighbors[I]; index++)
 	    {
@@ -96,16 +96,13 @@ void Matrix_M::generate_M()
 
 	    dcdx += sumx;
 	    dcdy += sumy;
-	    dcdz += sumz;
+	    dcdz += sumz;*/
 
 	    for (int jdim = 0; jdim < 3; jdim++)
 	    {
 	      M[jdim][0][I][J] += C[I][i] * dcdx * (r[i][jdim] - R[I][jdim]);
 	      M[jdim][1][I][J] += C[I][i] * dcdy * (r[i][jdim] - R[I][jdim]);
 	      M[jdim][2][I][J] += C[I][i] * dcdz * (r[i][jdim] - R[I][jdim]);
-	      //M[jdim][0][I][J] += C[I][i] * dcdx * r[i][jdim];
-	      //M[jdim][1][I][J] += C[I][i] * dcdy * r[i][jdim];
-	      //M[jdim][2][I][J] += C[I][i] * dcdz * r[i][jdim];
 	    }	
 	  } 
 	}
@@ -120,9 +117,7 @@ void Matrix_M::generate_M()
 	    dcdy = dw[I][i][1] / W[I][i] - dw[I][i][1] / w_sum[i];
 	    dcdz = dw[I][i][2] / W[I][i] - dw[I][i][2] / w_sum[i];
 
-	    //printf("%e %e %e\n", dcdx,dcdy,dcdz);
-	    //printf("%e %e %e\n", dw[I][i][0], W[I][i], w_sum[i]);
-	    double sumx = 0.0, sumy = 0.0, sumz = 0.0;
+	    /*double sumx = 0.0, sumy = 0.0, sumz = 0.0;
 
 	    for (int index=0; index<numNeighbors[I]; index++)
 	    {
@@ -135,21 +130,16 @@ void Matrix_M::generate_M()
 
 	    dcdx -= sumx;
 	    dcdy -= sumy;
-	    dcdz -= sumz;
+	    dcdz -= sumz;*/
 
-	    //printf("%e %e %e\n", dcdx,dcdy,dcdz);
 
 	    for (int jdim = 0; jdim < 3; jdim++)
 	    {
 	      M[jdim][0][I][J] += C[I][i] * dcdx * (r[i][jdim] - R[I][jdim]);
 	      M[jdim][1][I][J] += C[I][i] * dcdy * (r[i][jdim] - R[I][jdim]);
 	      M[jdim][2][I][J] += C[I][i] * dcdz * (r[i][jdim] - R[I][jdim]);
-	      //M[jdim][0][I][J] += C[I][i] * dcdx * r[i][jdim];
-	      //M[jdim][1][I][J] += C[I][i] * dcdy * r[i][jdim];
-	      //M[jdim][2][I][J] += C[I][i] * dcdz * r[i][jdim];
 	    }	
 	  } 
-	    //printf("%f %f %f\n", M[0][0][I][J], M[0][1][I][J], M[0][2][I][J]);
 	}
       }
    } 

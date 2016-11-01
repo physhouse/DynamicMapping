@@ -33,7 +33,8 @@ double Matrix_C::weight(double r)
 
    /* tanh */
    //return 0.5 - 0.5 * tanh((r - rcut) / (rcut * 0.66));
-   return 0.5 - 0.5 * tanh((r - rcut) / (1.33));
+   double sigma = rcut * 0.9752;
+   return 0.5 - 0.5 * tanh((r - rcut) / sigma);
 }
 
 void Matrix_C::weight_deriv(double* R, double* r, double* dw_vec)
@@ -56,8 +57,9 @@ void Matrix_C::weight_deriv(double* R, double* r, double* dw_vec)
    //double tanhr = tanh((distance - rcut) / (rcut * 0.66));
    //double dwdr = -0.5 * (1.0 - tanhr * tanhr) / (rcut * 0.66);
 
-   double tanhr = tanh((distance - rcut) / (1.33));
-   double dwdr = -0.5 * (1.0 - tanhr * tanhr) / (1.33);
+   double sigma = rcut * 0.9752;
+   double tanhr = tanh((distance - rcut) / sigma);
+   double dwdr = -0.5 * (1.0 - tanhr * tanhr) / sigma;
 
    for (int idim = 0; idim < 3; idim++)
    {
