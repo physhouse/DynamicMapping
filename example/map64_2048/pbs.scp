@@ -1,9 +1,0 @@
-#!/bin/bash
-
-#SBATCH --job-name=R2k
-#SBATCH --exclusive
-#SBATCH --output=JOB.OUT
-
-export OMP_NUM_THREADS=8
-./test.x ../dump.lj.ld 1000000
-
