@@ -20,6 +20,7 @@ void Cg_sites::init(int argc, char** argv)
     GET_INT(cg_num)
     GET_REAL(tol)
     GET_REAL(timestep)
+    GET_REAL(sigmaOverRcut)
     GET_INT(niter)
     GET_INT(freq)
   VAR_END

@@ -17,6 +17,7 @@ public:
 
    double	L;
    double	rcut;
+   double       sigmaOverRcut;
    int		cg_num;
    double	timestep;
    double	tol;  //tolerance for the initial mapping

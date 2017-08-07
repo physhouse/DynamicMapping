@@ -1,5 +1,7 @@
-cg_num=64
+cg_num=125
 tol=1.0E-20
 timestep=0.005
+sigmaOverRcut=0.80
 niter=5000
 freq=1000
+

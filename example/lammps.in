@@ -33,4 +33,4 @@ thermo_style	custom step temp ke pe etotal
 dump		1 all custom 1 dump.lj id type x y z vx vy vz
 dump_modify	1 sort id
 
-run		20
+run		20000
