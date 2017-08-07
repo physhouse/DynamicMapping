@@ -87,7 +87,7 @@ void Engine::buildNeighbors()
 //Update Velocity for one frame
 void Engine::update()
 {
-    initFrame();
+    computeMatrices();
     matrixSolver();
     integrate();
     endOfFrame();
@@ -101,10 +101,6 @@ void Engine::exec()
     {
         cg_sites->IterateRMapToSelfConsistency();
         endOfFrame();
-    }
-    else
-    {
-
     }
 
     //cg_sites->output();
@@ -124,7 +120,7 @@ void Engine::exec()
         }
     }
     // The last frame, not loading
-    initFrame();
+    computeMatrices();
     matrixSolver();
     integrate();
     cg_sites->output();
@@ -202,7 +198,7 @@ void Engine::testing(int step)
     printf("\n");
 }
 
-void Engine::initFrame()
+void Engine::computeMatrices()
 {
     matrix_C->compute();
     printf("finishing C\n");
@@ -363,6 +359,11 @@ void Engine::checker()
         double Riz = 0.0;
 
         double CI_square = 0.0;
+
+        // The recalculation of the CG site positions from the map
+        // should be in cg_sites.
+        // The recalculation should only take place if it will actually
+        // be printed, also.
         for (int j = 0; j < fg_num; j++)
         {
             double r_shift = r[j][0];
@@ -391,11 +392,11 @@ void Engine::checker()
 
     //checkmap<<error<<std::endl;
 
-    for (int ind = 0; ind < 3 * cg_sites->cg_num; ind++)
+    for (int i = 0; i < 3 * cg_sites->cg_num; i++)
     {
         double sum_bij = 0.0;
-        for (int i = 0; i < 3 * fg_atoms->fg_num; i++)
-            sum_bij += vMap[ind * 3 * fg_num + i] * vMap[ind * 3 * fg_num + i];
+        for (int j = 0; j < 3 * fg_atoms->fg_num; j++)
+            sum_bij += vMap[i * 3 * fg_num + j] * vMap[i * 3 * fg_num + j];
 
         invMass << sum_bij << std::endl;
     }

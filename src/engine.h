@@ -14,7 +14,7 @@ public:
     void update();
     void exec();
 
-    void initFrame();
+    void computeMatrices();
     void matrixSolver();
     void integrate();
     void endOfFrame();

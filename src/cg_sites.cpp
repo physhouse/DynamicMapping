@@ -69,11 +69,11 @@ void Cg_sites::init(int argc, char **argv)
     else  //read Data from restart files
     {
         assert(argv[4] != NULL);
-        int aid, mid;
+        int aid, type;
         FILE *fp = fopen(argv[4], "r+");
         for (int i = 0; i < cg_num; i++)
         {
-            fscanf(fp, "%d %d %lf %lf %lf %lf", &aid, &mid, &M[i], &R[i][0], &R[i][1], &R[i][2]);
+            fscanf(fp, "%d %d %lf %lf %lf %lf", &aid, &type, &M[i], &R[i][0], &R[i][1], &R[i][2]);
         }
         fclose(fp);
         printf("Restart Parsing Finished\n");
