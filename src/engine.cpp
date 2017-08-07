@@ -99,7 +99,7 @@ void Engine::exec()
 
     if (!restartFlag)
     {
-        cg_sites->firstMapping();
+        cg_sites->IterateRMapToSelfConsistency();
         endOfFrame();
     }
     else
@@ -120,7 +120,7 @@ void Engine::exec()
         {
             printf("Step %d\n", fg_atoms->currentStep);
             //testing(i);
-            cg_sites->firstMapping();
+            cg_sites->IterateRMapToSelfConsistency();
         }
     }
     // The last frame, not loading

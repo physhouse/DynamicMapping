@@ -11,7 +11,7 @@ public:
     Cg_sites(class Mapping *);
     ~Cg_sites();
     void init(int argc, char **argv);
-    void firstMapping();
+    void IterateRMapToSelfConsistency();
     void output();
     void cleanup();
 

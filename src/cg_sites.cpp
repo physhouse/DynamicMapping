@@ -146,7 +146,7 @@ void Cg_sites::output()
 
 // Iterate the CG position map to self-consistency.
 
-void Cg_sites::firstMapping()
+void Cg_sites::IterateRMapToSelfConsistency()
 {
     double sum_of_sq_displacements = 0.0;
     double **mapMatrix = matrix_C->C;
