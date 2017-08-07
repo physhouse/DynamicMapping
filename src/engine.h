@@ -25,8 +25,8 @@ public:
     void compute_ke();
 
 private:
-    double **MCG;
-    double **MFG;
+    double **IMinusM;
+    double **CPlusN;
     double  *vMap;
     double   ke; //Kinetic Energy
 

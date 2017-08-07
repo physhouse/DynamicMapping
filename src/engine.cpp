@@ -34,18 +34,18 @@ void Engine::init(int argc)
     int size_cg = 3 * cg_num;
     int size_fg = 3 * fg_num;
 
-    MCG = new double* [size_cg];
-    MFG = new double* [size_cg];
+    IMinusM = new double* [size_cg];
+    CPlusN = new double* [size_cg];
 
     vMap = new double[size_cg * size_fg];
     memset(vMap, 0, sizeof(double) * size_cg * size_fg);
 
     for (int i = 0; i < size_cg; i++)
     {
-        MCG[i] = new double[size_cg];
-        memset(MCG[i], 0, sizeof(double) * size_cg);
-        MFG[i] = new double[size_fg];
-        memset(MFG[i], 0, sizeof(double) * size_fg);
+        IMinusM[i] = new double[size_cg];
+        memset(IMinusM[i], 0, sizeof(double) * size_cg);
+        CPlusN[i] = new double[size_fg];
+        memset(CPlusN[i], 0, sizeof(double) * size_fg);
     }
 
     checkmap.open("CG_check.lmpstrj", std::ofstream::out);
@@ -63,11 +63,11 @@ void Engine::cleanup()
 
     for (int i = 0; i < size_cg; i++)
     {
-        delete[] MCG[i];
-        delete[] MFG[i];
+        delete[] IMinusM[i];
+        delete[] CPlusN[i];
     }
-    delete[] MCG;
-    delete[] MFG;
+    delete[] IMinusM;
+    delete[] CPlusN;
     delete[] vMap;
 }
 
@@ -211,32 +211,32 @@ void Engine::computeMatrices()
     double **    **M = matrix_M->M;
     double **    **N = matrix_N->N;
     double      **C = matrix_C->C;
-    //Building the MFG and MCG matrices
+    //Building the CPlusN and IMinusM matrices
     for (int idim = 0; idim < 3; idim++)
     {
         int offset_d1 = idim * cg_num;
         for (int i = offset_d1; i < (offset_d1 + cg_num); i++)
         {
-            //MCG = 1 - M
+            //IMinusM = 1 - M
             for (int jdim = 0; jdim < 3; jdim++)
             {
                 int offset_d2 = jdim * cg_num;
                 for (int j = offset_d2; j < (offset_d2 + cg_num); j++)
                 {
                     double deltaij = (i == j) ? 1.0 : 0.0;
-                    //MCG[i][j] = deltaij;
-                    MCG[i][j] = deltaij - M[idim][jdim][i - offset_d1][j - offset_d2];
+                    //IMinusM[i][j] = deltaij;
+                    IMinusM[i][j] = deltaij - M[idim][jdim][i - offset_d1][j - offset_d2];
                 }
             }
-            //MFG = C + V
+            //CPlusN = C + V
             for (int jdim = 0; jdim < 3; jdim++)
             {
                 int offset_d2 = jdim * fg_num;
                 for (int j = offset_d2; j < (offset_d2 + fg_num); j++)
                 {
                     double Cij = (idim == jdim) ? C[i - offset_d1][j - offset_d2] : 0.0;
-                    //MFG[i][j] = Cij;
-                    MFG[i][j] = Cij + N[idim][jdim][i - offset_d1][j - offset_d2];
+                    //CPlusN[i][j] = Cij;
+                    CPlusN[i][j] = Cij + N[idim][jdim][i - offset_d1][j - offset_d2];
                 }
             }
         }
@@ -248,7 +248,7 @@ void Engine::matrixSolver()
 {
     double *V_CG = cg_sites->V;
     double *v_fg = fg_atoms->v;
-    // Calculate MFG*v_fg
+    // Calculate CPlusN*v_fg
 
     int m = 3 * cg_num;
     int lda = m;
@@ -260,7 +260,7 @@ void Engine::matrixSolver()
     {
         for (int j = 0; j < m; j++)
         {
-            A[i * lda + j] = MCG[i][j];
+            A[i * lda + j] = IMinusM[i][j];
         }
     }
 
@@ -295,7 +295,7 @@ void Engine::matrixSolver()
     {
         for (int j = 0; j < n; j++)
         {
-            B[i * ldb + j] = MFG[i][j];
+            B[i * ldb + j] = CPlusN[i][j];
         }
     }
 
