@@ -17,11 +17,11 @@ int main()
     int ldb = 2;*/
 
     int N = 3;
-    double A[9] = { 1, 3 , 5,
-                    2, 4 , 7 ,
-                    -3, 2 , 5
+    double A[9] = { 1, 3, 5,
+                    2, 4, 7,
+                    -3, 2, 5
                   };
-    double B[3] = { 2, -1 , -5};
+    double B[3] = { 2, -1, -5};
     int ipiv[3];
     int n = N;
     int nrhs = 1;
