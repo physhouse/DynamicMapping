@@ -2,8 +2,8 @@
 
 int main(int narg, char **args)
 {
-    Mapping *test = new Mapping(narg, args);
-    test->exec();
-    delete test;
+    Mapping *mapping_obj = new Mapping(narg, args);
+    mapping_obj->exec();
+    delete mapping_obj;
     return 0;
 }

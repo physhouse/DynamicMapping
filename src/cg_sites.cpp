@@ -82,18 +82,21 @@ void Cg_sites::init(int argc, char **argv)
     cgtrj.open("CG_TRJ.lmpstrj", std::ofstream::out);
     cgtrj << "CG_TRJ : Dynamical Mapping Coarse Graining" << std::endl;
 
-    /*cgtrj<<"ITEM: TIMESTEP"<<std::endl;
-    cgtrj<<0<<std::endl;
-    cgtrj<<"ITEM: NUMBER OF ATOMS"<<std::endl;
-    cgtrj<<cg_num<<std::endl;
-    cgtrj<<"ITEM: BOX BOUNDS pp pp pp"<<std::endl;
-    for (int i=0; i<3; i++) cgtrj<<"0 "<<fg_atoms->L<<std::endl;
-    cgtrj<<"ITEM: ATOMS id type m x y z vx vy vz"<<std::endl;
+    // Print out the initial configuration if it needs to be checked.
+    if (false) {
+        cgtrj<<"ITEM: TIMESTEP"<<std::endl;
+        cgtrj<<0<<std::endl;
+        cgtrj<<"ITEM: NUMBER OF ATOMS"<<std::endl;
+        cgtrj<<cg_num<<std::endl;
+        cgtrj<<"ITEM: BOX BOUNDS pp pp pp"<<std::endl;
+        for (int i=0; i<3; i++) cgtrj<<"0 "<<fg_atoms->L<<std::endl;
+        cgtrj<<"ITEM: ATOMS id type m x y z vx vy vz"<<std::endl;
 
-    for (int i=0; i<cg_num; i++)
-    {
-      cgtrj<<i+1<<' '<<1<<' '<<M[i]<<' '<<R[i][0]<<' '<<R[i][1]<<' '<<R[i][2]<<' '<<V[i]<<' '<<V[i + cg_num]<<' '<<V[i + 2*cg_num]<<std::endl;
-    }*/
+        for (int i=0; i<cg_num; i++)
+        {
+          cgtrj<<i+1<<' '<<1<<' '<<M[i]<<' '<<R[i][0]<<' '<<R[i][1]<<' '<<R[i][2]<<' '<<V[i]<<' '<<V[i + cg_num]<<' '<<V[i + 2*cg_num]<<std::endl;
+        }
+    }
 }
 
 void Cg_sites::cleanup()
@@ -141,9 +144,11 @@ void Cg_sites::output()
     }
 }
 
+// Iterate the CG position map to self-consistency.
+
 void Cg_sites::firstMapping()
 {
-    double error = 0.0;
+    double sum_of_sq_displacements = 0.0;
     double **mapMatrix = matrix_C->C;
     double **r = fg_atoms->r;
     int fg_num = fg_atoms->fg_num;
@@ -151,20 +156,33 @@ void Cg_sites::firstMapping()
 
     for (int round = 0; round < niter; round++)
     {
-        error = 0.0;
+        // For each CG site, update the position according to
+        // the most recent coefficients, keeping track of how
+        // much it was moved and the sum of squares of those
+        // displacement vectors.
+        sum_of_sq_displacements = 0.0;
         for (int i = 0; i < cg_num; i++)
         {
             double ri0 = R[i][0];
             double ri1 = R[i][1];
             double ri2 = R[i][2];
-            R[i][0] = 0.0;
-            R[i][1] = 0.0;
-            R[i][2] = 0.0;
+
+            // The next fixed point iterate is a fraction of the original
+            // plus a fraction of the new. 
+            // Take the fraction of the original.
+            R[i][0] = alpha * ri0;
+            R[i][1] = alpha * ri1;
+            R[i][2] = alpha * ri2;
+            // Add the complementary fraction of the new.
             for (int j = 0; j < fg_num; j++)
             {
+                // For each coordinate, 
+                // Get the desired periodic image of the current fine-grained 
+                // particle's coordinate,
                 double r_shift = r[j][0];
                 if ((r_shift - ri0) > 0.5 * L) r_shift -= L;
                 else if ((r_shift - ri0) < -0.5 * L) r_shift += L;
+                // then add to the iterate.
                 R[i][0] += (1 - alpha) * mapMatrix[i][j] * r_shift;
 
                 r_shift = r[j][1];
@@ -178,21 +196,19 @@ void Cg_sites::firstMapping()
                 R[i][2] += (1 - alpha) * mapMatrix[i][j] * r_shift;
             }
 
-            R[i][0] += alpha * ri0;
-            R[i][1] += alpha * ri1;
-            R[i][2] += alpha * ri2;
-
             //printf("R = %12.8lf, before = %12.8lf\n", R[i][0], ri0);
-            error += (R[i][0] - ri0) * (R[i][0] - ri0) + (R[i][1] - ri1) * (R[i][1] - ri1) + (R[i][2] - ri2) * (R[i][2] - ri2);
+            sum_of_sq_displacements += (R[i][0] - ri0) * (R[i][0] - ri0) + (R[i][1] - ri1) * (R[i][1] - ri1) + (R[i][2] - ri2) * (R[i][2] - ri2);
         }
 
-        if (error < tol) return;
+        if (sum_of_sq_displacements < tol) return;
         else
             matrix_C->compute();
         if (round % 2 == 0)
         {
-            printf("Round %d, error = %e\n", round, error);
+            printf("Round %d, error = %e\n", round, sum_of_sq_displacements);
         }
     }
+    printf("Iterative search for self-consistent CG map failed to converge with %d iterations.", niter);
+    exit(EXIT_FAILURE);
 }
 
