@@ -126,14 +126,13 @@ void Matrix_C::init()
         F[i] = M0;
     }
 
-    matrixGenerator();
     compute();
 }
 
 //cleanup
 void Matrix_C::cleanup()
 {
-    delete []w_sum;
+    delete [] w_sum;
     for (int i = 0; i < cg_num; i++)
     {
         for (int j = 0; j < fg_num; j++) delete[] dw[i][j];
@@ -218,54 +217,6 @@ void Matrix_C::matrixGenerator()
 double Matrix_C::massWeights(double M)
 {
     return exp(- (M - M0) * (M - M0) / (2 * width * width));
-}
-
-double Matrix_C::weightsVarying(double *R, double *r, double M)
-{
-    double distance = 0.0;
-    for (int dim = 0; dim < 3; dim++)
-    {
-        double r_dim = R[dim] - r[dim];
-        if (r_dim > 0.5 * L) distance += (r_dim - L) * (r_dim - L);
-        else if (r_dim < -0.5 * L) distance += (r_dim + L) * (r_dim + L);
-        else distance += r_dim * r_dim;
-    }
-    distance = sqrt(distance);
-
-    //sigmoid function
-    double em = exp(12.0 * (M0 - M) / M0);
-    double sigma = 0.50 * rcut * em / (1.0 + em) + 0.75 * rcut;
-    double r0 = distance / sigma;
-    return exp(- r0 * r0);
-}
-
-//Relaxation Iteration Method
-void Matrix_C::weightsVarying_deriv(double *R, double *r, double *dw_vec, double M, double alpha)
-{
-    double distance = 0.0;
-    for (int dim = 0; dim < 3; dim++)
-    {
-        double r_dim = R[dim] - r[dim];
-        if (r_dim > 0.5 * L) distance += (r_dim - L) * (r_dim - L);
-        else if (r_dim < -0.5 * L) distance += (r_dim + L) * (r_dim + L);
-        else distance += r_dim * r_dim;
-    }
-
-    distance = sqrt(distance);
-
-    double em = exp(12.0 * (M0 - M) / M0);
-    double sigma = 0.50 * rcut * em / (1.0 + em) + 0.75 * rcut;
-    double r0 = distance / sigma;
-    double dwdr = - 2.0 * (r0 / sigma) * exp(-r0 * r0);
-
-    for (int idim = 0; idim < 3; idim++)
-    {
-        double r_dim = R[idim] - r[idim];
-        if (r_dim > 0.5 * L) r_dim -= L;
-        else if (r_dim < -0.5 * L) r_dim += L;
-
-        dw_vec[idim] = (1.0 - alpha) * dw_vec[idim] + alpha * dwdr * r_dim / distance;
-    }
 }
 
 double Matrix_C::generateWeights()
@@ -357,59 +308,6 @@ void Matrix_C::generateMatrixC()
         {
             int index = fgList[i][j];
             sumC[i] += C[index][i];
-        }
-    }
-}
-
-void Matrix_C::iterateSolver()
-{
-    double error = 100.0;
-    double threshold = 1e-10;
-    int    niter = 5000;
-
-    double   **r     = fg_atoms->r;
-    double   **R     = cg_sites->R;
-    double ***  dw    = matrix_C->dw;
-    double   **dw_sum = matrix_C->dw_sum;
-
-    int      *numNeighbors = neighbor->numNeighbors;
-    int      *numFgNeighbors = neighbor->numFgNeighbors;
-    int     **list = neighbor->list;
-    int     **fgList = neighbor->fgList;
-
-    for (int i = 0; i < niter; i++)
-    {
-        error = generateWeights();
-        generateMatrixC();
-        generateMass();
-
-        if (error < threshold)
-        {
-            printf("converged!\n");
-            break;
-        }
-    }
-
-    for (int I = 0; I < cg_num; I++)
-    {
-        for (int i = 0; i < numNeighbors[I]; i++)
-        {
-            int index = list[I][i];
-            weightsVarying_deriv(R[I], r[index], dw[I][index], F[I], 1.0);
-        }
-    }
-
-    for (int i = 0; i < fg_num; i++)
-    {
-        dw_sum[i][0] = 0.0;
-        dw_sum[i][1] = 0.0;
-        dw_sum[i][2] = 0.0;
-        for (int j = 0; j < numFgNeighbors[i]; j++)
-        {
-            int index = fgList[i][j];
-            dw_sum[i][0] += dw[index][i][0];
-            dw_sum[i][1] += dw[index][i][1];
-            dw_sum[i][2] += dw[index][i][2];
         }
     }
 }

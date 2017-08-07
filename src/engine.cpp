@@ -108,10 +108,16 @@ void Engine::exec()
     {
         update();
         //testing(i);
+
+        // Rebuild the neighbor list every timestep after
+        // reading the new FG frame.
         if (i % 1 == 0)
         {
             buildNeighbors();
         }
+        // Enforce self-consistency explicitly at periodic intervals
+        // to ensure stable integration on the constraint manifold.
+        // This belongs in the integrator.
         if (fg_atoms->currentStep % cg_sites->freq == 0)
         {
             printf("Step %d\n", fg_atoms->currentStep);
@@ -228,7 +234,7 @@ void Engine::computeMatrices()
                     IMinusM[i][j] = deltaij - M[idim][jdim][i - offset_d1][j - offset_d2];
                 }
             }
-            //CPlusN = C + V
+            //CPlusN = C + N
             for (int jdim = 0; jdim < 3; jdim++)
             {
                 int offset_d2 = jdim * fg_num;
