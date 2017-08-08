@@ -364,45 +364,51 @@ void Engine::checker()
 
         double CI_square = 0.0;
 
+        // Check the difference between the current and mapped CG site positions.
         // The recalculation of the CG site positions from the map
         // should be in cg_sites.
-        // The recalculation should only take place if it will actually
-        // be printed, also.
-        for (int j = 0; j < fg_num; j++)
-        {
-            double r_shift = r[j][0];
-            if ((r_shift - cg_sites->R[i][0]) > 0.5 * L) r_shift -= L;
-            else if ((r_shift - cg_sites->R[i][0]) < -0.5 * L) r_shift += L;
-            Rix += C[i][j] * r_shift;
+        bool check_mapped_positions = false;
+        if (check_mapped_positions) {
+            for (int j = 0; j < fg_num; j++)
+            {
+                double r_shift = r[j][0];
+                if ((r_shift - cg_sites->R[i][0]) > 0.5 * L) r_shift -= L;
+                else if ((r_shift - cg_sites->R[i][0]) < -0.5 * L) r_shift += L;
+                Rix += C[i][j] * r_shift;
 
-            r_shift = r[j][1];
-            if ((r_shift - cg_sites->R[i][1]) > 0.5 * L) r_shift -= L;
-            else if ((r_shift - cg_sites->R[i][1]) < -0.5 * L) r_shift += L;
-            Riy += C[i][j] * r_shift;
+                r_shift = r[j][1];
+                if ((r_shift - cg_sites->R[i][1]) > 0.5 * L) r_shift -= L;
+                else if ((r_shift - cg_sites->R[i][1]) < -0.5 * L) r_shift += L;
+                Riy += C[i][j] * r_shift;
 
-            r_shift = r[j][2];
-            if ((r_shift - cg_sites->R[i][2]) > 0.5 * L) r_shift -= L;
-            else if ((r_shift - cg_sites->R[i][2]) < -0.5 * L) r_shift += L;
-            Riz += C[i][j] * r_shift;
+                r_shift = r[j][2];
+                if ((r_shift - cg_sites->R[i][2]) > 0.5 * L) r_shift -= L;
+                else if ((r_shift - cg_sites->R[i][2]) < -0.5 * L) r_shift += L;
+                Riz += C[i][j] * r_shift;
+            }
 
-            CI_square += C[i][j] * C[i][j];
+            error += (Rix - cg_sites->R[i][0]) * (Rix - cg_sites->R[i][0]) + (Riy - cg_sites->R[i][1]) * (Riy - cg_sites->R[i][1]) + (Riz - cg_sites->R[i][2]) * (Riz - cg_sites->R[i][2]);
+            checkmap << i + 1 << ' ' << 1 << ' ' << Rix - cg_sites->R[i][0] << ' ' << Riy - cg_sites->R[i][1] << ' ' << Riz - cg_sites->R[i][2] << ' ' << std::endl;
         }
 
+        // Check the sum of squares of c_Ii coefficients.
+        for (int j = 0; j < fg_num; j++) {
+            CI_square += C[i][j] * C[i][j];
+        }
         checkmap << CI_square << std::endl;
 
-        error += (Rix - cg_sites->R[i][0]) * (Rix - cg_sites->R[i][0]) + (Riy - cg_sites->R[i][1]) * (Riy - cg_sites->R[i][1]) + (Riz - cg_sites->R[i][2]) * (Riz - cg_sites->R[i][2]);
-        //checkmap<<i+1<<' '<<1<<' '<<Rix - cg_sites->R[i][0]<<' '<<Riy - cg_sites->R[i][1]<<' '<<Riz - cg_sites->R[i][2]<<' '<<std::endl;
     }
 
     //checkmap<<error<<std::endl;
 
+    // Check the current inverse mass of the CG site.
     for (int i = 0; i < 3 * cg_sites->cg_num; i++)
     {
-        double sum_bij = 0.0;
+        double sum_bij_sq = 0.0;
         for (int j = 0; j < 3 * fg_atoms->fg_num; j++)
-            sum_bij += vMap[i * 3 * fg_num + j] * vMap[i * 3 * fg_num + j];
+            sum_bij_sq += vMap[i * 3 * fg_num + j] * vMap[i * 3 * fg_num + j];
 
-        invMass << sum_bij << std::endl;
+        invMass << sum_bij_sq << std::endl;
     }
 
 }
