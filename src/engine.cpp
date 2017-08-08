@@ -90,47 +90,45 @@ void Engine::update()
     computeMatrices();
     matrixSolver();
     integrate();
-    endOfFrame();
+    cg_sites->output();
+    checker();
 }
 
 void Engine::exec()
 {
+    bool do_testing = false;
     printf("nsteps = %d\n", nsteps);
 
     if (!restartFlag)
     {
         cg_sites->IterateRMapToSelfConsistency();
-        endOfFrame();
+        cg_sites->output();
+        checker();
+        fg_atoms->readNextFrame();
     }
 
     //cg_sites->output();
     for (int i = 0; i < nsteps - 1; i++)
     {
         update();
-        //testing(i);
+        fg_atoms->readNextFrame();
+        if (do_testing) testing(i);
 
         // Rebuild the neighbor list every timestep after
         // reading the new FG frame.
-        if (i % 1 == 0)
-        {
-            buildNeighbors();
-        }
+        if (i % 1 == 0) buildNeighbors();
         // Enforce self-consistency explicitly at periodic intervals
         // to ensure stable integration on the constraint manifold.
         // This belongs in the integrator.
         if (fg_atoms->currentStep % cg_sites->freq == 0)
         {
             printf("Step %d\n", fg_atoms->currentStep);
-            //testing(i);
+            if (do_testing) testing(i);
             cg_sites->IterateRMapToSelfConsistency();
         }
     }
-    // The last frame, not loading
-    computeMatrices();
-    matrixSolver();
-    integrate();
-    cg_sites->output();
-    checker();
+    // The last frame, no need to load next frame.
+    update();
     fg_atoms->finishReading();
 }
 
@@ -408,18 +406,3 @@ void Engine::checker()
     }
 
 }
-
-void Engine::compute_ke()
-{
-
-}
-
-
-void Engine::endOfFrame()
-{
-    cg_sites->output();
-    //fg_atoms->output();
-    checker();
-    fg_atoms->readNextFrame();
-}
-

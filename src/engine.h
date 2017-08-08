@@ -17,12 +17,10 @@ public:
     void computeMatrices();
     void matrixSolver();
     void integrate();
-    void endOfFrame();
     void buildNeighbors();
     void cleanup();
     void checker();
     void testing(int step);
-    void compute_ke();
 
 private:
     double **IMinusM;
