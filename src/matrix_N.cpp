@@ -41,21 +41,6 @@ void Matrix_N::init()
     }
 }
 
-// Generating the matrix dc/dR
-double Matrix_N::distance(double *R, double *r)
-{
-    double L = fg_atoms->L;
-    double distance = 0.0;
-    for (int dim = 0; dim < 3; dim++)
-    {
-        double r_dim = R[dim] - r[dim];
-        if (r_dim > 0.5 * L) distance += (r_dim - L) * (r_dim - L);
-        else if (r_dim < -0.5 * L) distance += (r_dim + L) * (r_dim + L);
-        else distance += r_dim * r_dim;
-    }
-    return distance;
-}
-
 void Matrix_N::generate_N()
 {
     double   **r      = fg_atoms->r;

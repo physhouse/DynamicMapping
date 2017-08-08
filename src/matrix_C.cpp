@@ -3,6 +3,7 @@
 #include "matrix_C.h"
 #include "fg_atoms.h"
 #include "cg_sites.h"
+#include "geom.h"
 #include "neighbor.h"
 #include <cmath>
 
@@ -17,15 +18,8 @@ Matrix_C::~Matrix_C()
 // Calculation functions
 double Matrix_C::w_Ij(double *R, double *r)
 {
-    double distance = 0.0;
-    for (int dim = 0; dim < 3; dim++)
-    {
-        double r_dim = R[dim] - r[dim];
-        if (r_dim > 0.5 * L) distance += (r_dim - L) * (r_dim - L);
-        else if (r_dim < -0.5 * L) distance += (r_dim + L) * (r_dim + L);
-        else distance += r_dim * r_dim;
-    }
-    return weight(sqrt(distance));
+    double sq_distance = calc_sq_distance(R, r, L);
+    return weight(sqrt(sq_distance));
 }
 
 double Matrix_C::weight(double r)
@@ -67,9 +61,7 @@ void Matrix_C::weight_deriv(double *R, double *r, double *dw_vec)
     for (int idim = 0; idim < 3; idim++)
     {
         double r_dim = R[idim] - r[idim];
-        if (r_dim > 0.5 * L) r_dim -= L;
-        else if (r_dim < -0.5 * L) r_dim += L;
-
+        wrap_coord_relative(r_dim, 0, L);
         dw_vec[idim] = dwdr * r_dim / distance;
     }
 }

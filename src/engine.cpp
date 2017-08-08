@@ -1,4 +1,5 @@
 #include "engine.h"
+#include "geom.h"
 #include "pointers.h"
 #include "mapping.h"
 #include "matrix_C.h"
@@ -331,12 +332,7 @@ void Engine::integrate()
         R[i][1] += V_CG[i + cg_num] * dtv;
         R[i][2] += V_CG[i + 2 * cg_num] * dtv;
 
-        if (R[i][0] > L) R[i][0] -= L;
-        else if (R[i][0] < 0) R[i][0] += L;
-        if (R[i][1] > L) R[i][1] -= L;
-        else if (R[i][1] < 0) R[i][1] += L;
-        if (R[i][2] > L) R[i][2] -= L;
-        else if (R[i][2] < 0) R[i][2] += L;
+        for (int j = 0; j < 3; j++) wrap_coord_into_box(R[i][j], L);
     }
 
 }
@@ -372,18 +368,15 @@ void Engine::checker()
             for (int j = 0; j < fg_num; j++)
             {
                 double r_shift = r[j][0];
-                if ((r_shift - cg_sites->R[i][0]) > 0.5 * L) r_shift -= L;
-                else if ((r_shift - cg_sites->R[i][0]) < -0.5 * L) r_shift += L;
+                wrap_coord_relative(r_shift, cg_sites->R[i][0], L);
                 Rix += C[i][j] * r_shift;
 
                 r_shift = r[j][1];
-                if ((r_shift - cg_sites->R[i][1]) > 0.5 * L) r_shift -= L;
-                else if ((r_shift - cg_sites->R[i][1]) < -0.5 * L) r_shift += L;
+                wrap_coord_relative(r_shift, cg_sites->R[i][1], L);
                 Riy += C[i][j] * r_shift;
 
                 r_shift = r[j][2];
-                if ((r_shift - cg_sites->R[i][2]) > 0.5 * L) r_shift -= L;
-                else if ((r_shift - cg_sites->R[i][2]) < -0.5 * L) r_shift += L;
+                wrap_coord_relative(r_shift, cg_sites->R[i][2], L);
                 Riz += C[i][j] * r_shift;
             }
 

@@ -12,7 +12,6 @@ public:
     void generate_M();
     void compute();
     void cleanup();
-    double distance(double *, double *);
 
     double **   **M; // M matrix, dim * dim * cg * cg
     int      cg_num;
