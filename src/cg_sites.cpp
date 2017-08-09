@@ -163,6 +163,7 @@ void Cg_sites::IterateRMapToSelfConsistency()
             double R_initial[3];
             double R_recalc[3];
 
+            // Store the old position and calculate the new one.
             for (int dim = 0; dim < 3; dim++) {
                 R_initial[dim] = R[i][dim];
                 R_recalc[dim] = 0;
@@ -170,8 +171,7 @@ void Cg_sites::IterateRMapToSelfConsistency()
             matrix_C->recalc_CG_position(i, R_recalc);
 
             // The next fixed point iterate is a fraction of the original
-            // plus a fraction of the new. 
-            sum_of_sq_displacements = 0;
+            // plus a fraction of the new. Track total squared change to check termination.
             for (int dim = 0; dim < 3; dim++) {
                 R[i][dim] = alpha * R_initial[dim] + (1 - alpha) * R_recalc[dim];
                 sum_of_sq_displacements += (R_initial[dim] - R_recalc[dim]) * (R_initial[dim] - R_recalc[dim]);

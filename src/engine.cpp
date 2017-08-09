@@ -352,6 +352,8 @@ void Engine::checker()
     double   L = fg_atoms->L;
     double   error = 0.0;
 
+    bool check_mapped_positions = false;
+    bool check_sum_c_squared = true;
     for (int i = 0; i < cg_num; i++)
     {
         double recalc_R[3];
@@ -362,7 +364,6 @@ void Engine::checker()
         // Check the difference between the current and mapped CG site positions.
         // The recalculation of the CG site positions from the map
         // should be in cg_sites.
-        bool check_mapped_positions = false;
         if (check_mapped_positions) {
             matrix_C->recalc_CG_position(i, recalc_R);
             error += (recalc_R[0] - cg_sites->R[i][0]) * (recalc_R[0] - cg_sites->R[i][0]) + (recalc_R[1] - cg_sites->R[i][1]) * (recalc_R[1] - cg_sites->R[i][1]) + (recalc_R[2] - cg_sites->R[i][2]) * (recalc_R[2] - cg_sites->R[i][2]);
@@ -370,14 +371,17 @@ void Engine::checker()
         }
 
         // Check the sum of squares of c_Ii coefficients.
-        for (int j = 0; j < fg_num; j++) {
-            CI_square += C[i][j] * C[i][j];
+        if (check_sum_c_squared) {
+            for (int j = 0; j < fg_num; j++) {
+                CI_square += C[i][j] * C[i][j];
+            }
+            checkmap << CI_square << std::endl;
         }
-        checkmap << CI_square << std::endl;
-
     }
 
-    //checkmap<<error<<std::endl;
+    if (check_mapped_positions) {
+        checkmap << error << std::endl;
+    }
 
     // Check the current inverse mass of the CG site.
     for (int i = 0; i < 3 * cg_sites->cg_num; i++)
