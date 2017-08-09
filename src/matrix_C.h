@@ -15,6 +15,8 @@ public:
     void calc_proximity_deriv(const double * const R, const double * const r, double * const dwvec) const;
     void calc_proximity_and_deriv(const double * const R, const double * const r, double &w, double * const dw_vec) const;
 
+    void recalc_CG_position(const int I, double * const R) const;
+
     void matrixGenerator();
     double generateWeights();
     void generateMass();

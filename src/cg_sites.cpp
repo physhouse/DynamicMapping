@@ -149,9 +149,6 @@ void Cg_sites::output()
 void Cg_sites::IterateRMapToSelfConsistency()
 {
     double sum_of_sq_displacements = 0.0;
-    double **mapMatrix = matrix_C->C;
-    double **r = fg_atoms->r;
-    int fg_num = fg_atoms->fg_num;
     double alpha = 0.70;
 
     for (int round = 0; round < niter; round++)
@@ -163,41 +160,22 @@ void Cg_sites::IterateRMapToSelfConsistency()
         sum_of_sq_displacements = 0.0;
         for (int i = 0; i < cg_num; i++)
         {
-            double ri0 = R[i][0];
-            double ri1 = R[i][1];
-            double ri2 = R[i][2];
+            double R_initial[3];
+            double R_recalc[3];
+
+            for (int dim = 0; dim < 3; dim++) {
+                R_initial[dim] = R[i][dim];
+                R_recalc[dim] = 0;
+            }
+            matrix_C->recalc_CG_position(i, R_recalc);
 
             // The next fixed point iterate is a fraction of the original
             // plus a fraction of the new. 
-            // Take the fraction of the original.
-            R[i][0] = alpha * ri0;
-            R[i][1] = alpha * ri1;
-            R[i][2] = alpha * ri2;
-            // Add the complementary fraction of the new.
-            for (int j = 0; j < fg_num; j++)
-            {
-                // For each coordinate, 
-                // Get the desired periodic image of the current fine-grained 
-                // particle's coordinate,
-                double r_shift = r[j][0];
-                if ((r_shift - ri0) > 0.5 * L) r_shift -= L;
-                else if ((r_shift - ri0) < -0.5 * L) r_shift += L;
-                // then add to the iterate.
-                R[i][0] += (1 - alpha) * mapMatrix[i][j] * r_shift;
-
-                r_shift = r[j][1];
-                if ((r_shift - ri1) > 0.5 * L) r_shift -= L;
-                else if ((r_shift - ri1) < -0.5 * L) r_shift += L;
-                R[i][1] += (1 - alpha) * mapMatrix[i][j] * r_shift;
-
-                r_shift = r[j][2];
-                if ((r_shift - ri2) > 0.5 * L) r_shift -= L;
-                else if ((r_shift - ri2) < -0.5 * L) r_shift += L;
-                R[i][2] += (1 - alpha) * mapMatrix[i][j] * r_shift;
+            sum_of_sq_displacements = 0;
+            for (int dim = 0; dim < 3; dim++) {
+                R[i][dim] = alpha * R_initial[dim] + (1 - alpha) * R_recalc[dim];
+                sum_of_sq_displacements += (R_initial[dim] - R_recalc[dim]) * (R_initial[dim] - R_recalc[dim]);
             }
-
-            //printf("R = %12.8lf, before = %12.8lf\n", R[i][0], ri0);
-            sum_of_sq_displacements += (R[i][0] - ri0) * (R[i][0] - ri0) + (R[i][1] - ri1) * (R[i][1] - ri1) + (R[i][2] - ri2) * (R[i][2] - ri2);
         }
 
         if (sum_of_sq_displacements < tol) return;

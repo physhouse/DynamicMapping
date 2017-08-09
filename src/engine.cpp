@@ -354,9 +354,8 @@ void Engine::checker()
 
     for (int i = 0; i < cg_num; i++)
     {
-        double Rix = 0.0;
-        double Riy = 0.0;
-        double Riz = 0.0;
+        double recalc_R[3];
+        for (int dim = 0; dim < 3; dim++) recalc_R[dim] = 0;
 
         double CI_square = 0.0;
 
@@ -365,23 +364,9 @@ void Engine::checker()
         // should be in cg_sites.
         bool check_mapped_positions = false;
         if (check_mapped_positions) {
-            for (int j = 0; j < fg_num; j++)
-            {
-                double r_shift = r[j][0];
-                wrap_coord_relative(r_shift, cg_sites->R[i][0], L);
-                Rix += C[i][j] * r_shift;
-
-                r_shift = r[j][1];
-                wrap_coord_relative(r_shift, cg_sites->R[i][1], L);
-                Riy += C[i][j] * r_shift;
-
-                r_shift = r[j][2];
-                wrap_coord_relative(r_shift, cg_sites->R[i][2], L);
-                Riz += C[i][j] * r_shift;
-            }
-
-            error += (Rix - cg_sites->R[i][0]) * (Rix - cg_sites->R[i][0]) + (Riy - cg_sites->R[i][1]) * (Riy - cg_sites->R[i][1]) + (Riz - cg_sites->R[i][2]) * (Riz - cg_sites->R[i][2]);
-            checkmap << i + 1 << ' ' << 1 << ' ' << Rix - cg_sites->R[i][0] << ' ' << Riy - cg_sites->R[i][1] << ' ' << Riz - cg_sites->R[i][2] << ' ' << std::endl;
+            matrix_C->recalc_CG_position(i, recalc_R);
+            error += (recalc_R[0] - cg_sites->R[i][0]) * (recalc_R[0] - cg_sites->R[i][0]) + (recalc_R[1] - cg_sites->R[i][1]) * (recalc_R[1] - cg_sites->R[i][1]) + (recalc_R[2] - cg_sites->R[i][2]) * (recalc_R[2] - cg_sites->R[i][2]);
+            checkmap << i + 1 << ' ' << 1 << ' ' << recalc_R[0] - cg_sites->R[i][0] << ' ' << recalc_R[1] - cg_sites->R[i][1] << ' ' << recalc_R[2] - cg_sites->R[i][2] << ' ' << std::endl;
         }
 
         // Check the sum of squares of c_Ii coefficients.
