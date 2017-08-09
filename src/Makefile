@@ -9,7 +9,7 @@ LDFLAGS = -L$(LIBLAPACKPATH) -L$(LIBCBLAS)
 LIBS = -lblas -llapacke -llapack -lcblas -lgfortran
 CC = g++ $(OPT) -fopenmp
 
-../test.x : test.o engine.o fg_atoms.o cg_sites.o matrix_C.o matrix_M.o matrix_N.o mapping.o neighbor.o
+../test.x : test.o engine.o fg_atoms.o cg_sites.o matrix_C.o matrix_M.o vector_CNv.o mapping.o neighbor.o
 	$(CC) -o ../test.x *.o $(LDFLAGS) $(LIBS)
 
 test.o : test.cpp
@@ -33,8 +33,8 @@ matrix_C.o : matrix_C.cpp
 matrix_M.o : matrix_M.cpp
 	$(CC) -c matrix_M.cpp
 
-matrix_N.o : matrix_N.cpp
-	$(CC) -c matrix_N.cpp
+vector_CNv.o : vector_CNv.cpp
+	$(CC) -c vector_CNv.cpp
 
 neighbor.o : neighbor.cpp
 	$(CC) -c neighbor.cpp

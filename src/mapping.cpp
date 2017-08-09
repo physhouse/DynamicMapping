@@ -4,7 +4,7 @@
 #include "mapping.h"
 #include "matrix_C.h"
 #include "matrix_M.h"
-#include "matrix_N.h"
+#include "vector_CNv.h"
 #include "neighbor.h"
 #include <cstring>
 
@@ -15,7 +15,7 @@ Mapping::Mapping(int narg, char **arg)
     engine = new Engine(this);
     matrix_C = new Matrix_C(this);
     matrix_M = new Matrix_M(this);
-    matrix_N = new Matrix_N(this);
+    vector_CNv = new Vector_CNv(this);
     neighbor = new Neighbor(this);
 
     init(narg, arg);
@@ -34,7 +34,7 @@ void Mapping::init(int narg, char **arg)
     neighbor->init();
     matrix_C->init();
     matrix_M->init();
-    matrix_N->init();
+    vector_CNv->init();
 }
 
 void Mapping::exec()
@@ -48,7 +48,7 @@ void Mapping::destroy()
     delete fg_atoms;
     delete cg_sites;
     delete matrix_M;
-    delete matrix_N;
+    delete vector_CNv;
     delete matrix_C;
     delete neighbor;
 }

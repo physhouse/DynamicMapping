@@ -11,7 +11,7 @@ public:
     class Engine   *engine;
     class Matrix_C *matrix_C;
     class Matrix_M *matrix_M;
-    class Matrix_N *matrix_N;
+    class Vector_CNv *vector_CNv;
     class Neighbor *neighbor;
 
     Mapping(int, char **);

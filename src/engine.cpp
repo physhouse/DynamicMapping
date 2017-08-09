@@ -4,7 +4,7 @@
 #include "mapping.h"
 #include "matrix_C.h"
 #include "matrix_M.h"
-#include "matrix_N.h"
+#include "vector_CNv.h"
 #include "cg_sites.h"
 #include "fg_atoms.h"
 #include "neighbor.h"
@@ -36,18 +36,14 @@ void Engine::init(int argc)
     int size_fg = 3 * fg_num;
 
     IMinusM = new double* [size_cg];
-    CPlusN = new double* [size_cg];
-
-    vMap = new double[size_cg * size_fg];
-    memset(vMap, 0, sizeof(double) * size_cg * size_fg);
+    flat_CNv = new double [size_cg];
 
     for (int i = 0; i < size_cg; i++)
     {
         IMinusM[i] = new double[size_cg];
         memset(IMinusM[i], 0, sizeof(double) * size_cg);
-        CPlusN[i] = new double[size_fg];
-        memset(CPlusN[i], 0, sizeof(double) * size_fg);
     }
+    memset(flat_CNv, 0, sizeof(double) * size_cg);
 
     checkmap.open("CG_check.lmpstrj", std::ofstream::out);
     checkmap << "CG_CHECK : Checking the Propagation" << std::endl;
@@ -65,10 +61,8 @@ void Engine::cleanup()
     for (int i = 0; i < size_cg; i++)
     {
         delete[] IMinusM[i];
-        delete[] CPlusN[i];
     }
     delete[] IMinusM;
-    delete[] CPlusN;
     delete[] vMap;
 }
 
@@ -145,12 +139,12 @@ void Engine::testing(int step)
         printf("\n");
     }
 
-    printf("Testing N... Current Step %d\n", step);
+    printf("Testing CNv... Current Step %d\n", step);
     for (int i = 0; i < cg_sites->cg_num; i++)
     {
-        for (int j = 0; j < fg_atoms->fg_num; j++)
+        for (int j = 0; j < 3; j++)
         {
-            printf("%8.8lf\t", matrix_N->N[0][0][i][j]);
+            printf("%8.8lf\t", vector_CNv->CNv[j][i]);
         }
         printf("\n");
     }
@@ -209,14 +203,12 @@ void Engine::computeMatrices()
     printf("finishing C\n");
     matrix_M->compute();
     printf("finishing M\n");
-    matrix_N->compute();
-    printf("finishing N\n");
+    vector_CNv->compute();
+    printf("finishing CNv\n");
 
     //Filling in the matrices and vectors
     double **    **M = matrix_M->M;
-    double **    **N = matrix_N->N;
-    double      **C = matrix_C->C;
-    //Building the CPlusN and IMinusM matrices
+    //Building the IMinusM matrix and flattening (C + N)v
     for (int idim = 0; idim < 3; idim++)
     {
         int offset_d1 = idim * cg_num;
@@ -233,17 +225,7 @@ void Engine::computeMatrices()
                     IMinusM[i][j] = deltaij - M[idim][jdim][i - offset_d1][j - offset_d2];
                 }
             }
-            //CPlusN = C + N
-            for (int jdim = 0; jdim < 3; jdim++)
-            {
-                int offset_d2 = jdim * fg_num;
-                for (int j = offset_d2; j < (offset_d2 + fg_num); j++)
-                {
-                    double Cij = (idim == jdim) ? C[i - offset_d1][j - offset_d2] : 0.0;
-                    //CPlusN[i][j] = Cij;
-                    CPlusN[i][j] = Cij + N[idim][jdim][i - offset_d1][j - offset_d2];
-                }
-            }
+            flat_CNv[i] = CNv[idim][i - offset_d1];
         }
     }
 
@@ -253,7 +235,6 @@ void Engine::matrixSolver()
 {
     double *V_CG = cg_sites->V;
     double *v_fg = fg_atoms->v;
-    // Calculate CPlusN*v_fg
 
     int m = 3 * cg_num;
     int lda = m;
@@ -275,47 +256,23 @@ void Engine::matrixSolver()
     //Do the matrix Multiplication of (1-M)^(-1) with (C+N)
     enum CBLAS_ORDER order;
     enum CBLAS_TRANSPOSE transa;
-    enum CBLAS_TRANSPOSE transb;
 
     double alpha, beta;
-    int n, k, ldb, ldc;
 
     order = CblasRowMajor;
     transa = CblasNoTrans;
-    transb = CblasNoTrans;
 
     m = 3 * cg_num;
-    n = 3 * fg_num;
-    k = 3 * cg_num;
-
-    lda = k;
-    ldb = n;
-    ldc = n;
 
     alpha = 1.0;
     beta = 0.0;
 
-    double *B = new double[m * n];
-    for (int i = 0; i < m; i++)
-    {
-        for (int j = 0; j < n; j++)
-        {
-            B[i * ldb + j] = CPlusN[i][j];
-        }
-    }
-
-    cblas_dgemm(order, transa, transb, m, n, k, alpha, A, lda, B, ldb, beta, vMap, ldc);
-    printf("passing vMap\n");
-
-    delete[] B;
-    delete[] A;
-
     // Computing the CG Velocities
-    lda = n;
     int incx = 1;
     int incy = 1;
-    cblas_dgemv(order, transa, m, n, alpha, vMap, n, v_fg, incx, beta, V_CG, incy);
+    cblas_dgemv(order, transa, m, m, alpha, A, m, flat_CNv, incx, beta, V_CG, incy);
     printf("passing calculating V_CG\n");
+    delete[] A;
 }
 
 // Euler's 1st order integrator for ODE

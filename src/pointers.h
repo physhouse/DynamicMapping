@@ -13,7 +13,7 @@ public:
         engine(ptr->engine),
         matrix_C(ptr->matrix_C),
         matrix_M(ptr->matrix_M),
-        matrix_N(ptr->matrix_N),
+        vector_CNv(ptr->vector_CNv),
         neighbor(ptr->neighbor) {}
 
 protected:
@@ -23,7 +23,7 @@ protected:
     Engine   *&engine;
     Matrix_C*&matrix_C;
     Matrix_M*&matrix_M;
-    Matrix_N*&matrix_N;
+    Vector_CNv*&vector_CNv;
     Neighbor*&neighbor;
 
 };
