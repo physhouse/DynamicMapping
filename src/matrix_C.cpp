@@ -52,26 +52,6 @@ void Matrix_C::calc_proximity_deriv(const double * const R, const double * const
     }
 }
 
-void Matrix_C::recalc_CG_position(const int I, double * const R) const
-{
-    for (int j = 0; j < fg_num; j++)
-    {
-        if (C[I][j] != 0) {
-            double r_shift = fg_atoms->r[j][0];
-            wrap_coord_relative(r_shift, cg_sites->R[I][0], L);
-            R[0] += C[I][j] * r_shift;
-
-            r_shift = fg_atoms->r[j][1];
-            wrap_coord_relative(r_shift, cg_sites->R[I][1], L);
-            R[1] += C[I][j] * r_shift;
-
-            r_shift = fg_atoms->r[j][2];
-            wrap_coord_relative(r_shift, cg_sites->R[I][2], L);
-            R[2] += C[I][j] * r_shift;
-        }
-    }
-}
-
 // Initialization
 void Matrix_C::init()
 {

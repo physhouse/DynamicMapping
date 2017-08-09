@@ -11,6 +11,8 @@ public:
     Cg_sites(class Mapping *);
     ~Cg_sites();
     void init(int argc, char **argv);
+    void map_CG_position(const int I, double * const R) const;
+    void map_CG_velocities();
     void IterateRMapToSelfConsistency();
     void output();
     void cleanup();

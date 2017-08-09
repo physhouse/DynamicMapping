@@ -5,6 +5,7 @@
 #include "pointers.h"
 #include "comm.h"
 #include "assert.h"
+#include "geom.h"
 #include <cstdlib>
 #include <cstdio>
 #include <cmath>
@@ -113,6 +114,43 @@ void Cg_sites::cleanup()
 
 void Cg_sites::output()
 {
+    map_CG_velocities();
+    //header
+    cgtrj << "ITEM: TIMESTEP" << std::endl;
+    cgtrj << fg_atoms->currentStep << std::endl;
+    cgtrj << "ITEM: NUMBER OF ATOMS" << std::endl;
+    cgtrj << cg_num << std::endl;
+    cgtrj << "ITEM: BOX BOUNDS pp pp pp" << std::endl;
+    for (int i = 0; i < 3; i++) cgtrj << "0 " << fg_atoms->L << std::endl;
+    cgtrj << "ITEM: ATOMS id type m x y z vx vy vz fx fy fz" << std::endl;
+
+    for (int i = 0; i < cg_num; i++)
+    {
+        cgtrj << i + 1 << ' ' << 1 << ' ' << M[i] << ' ' << R[i][0] << ' ' << R[i][1] << ' ' << R[i][2] << ' ' << V[i] << ' ' << V[i + cg_num] << ' ' << V[i + 2 * cg_num] << ' ' << VMAP[i] << ' ' << VMAP[i + cg_num] << ' ' << VMAP[i + 2 * cg_num] << std::endl;
+    }
+}
+
+
+// Recalculate a CG position based on the C matrix.
+
+void Cg_sites::map_CG_position(const int I, double * const R_map) const
+{
+    double ** C = matrix_C->C;
+    double r_shift;
+    for (int j = 0; j < fg_atoms->fg_num; j++)
+    {
+        if (C[I][j] != 0) {
+            for (int dim = 0; dim < 3; dim++) {
+                r_shift = fg_atoms->r[j][dim];
+                wrap_coord_relative(r_shift, cg_sites->R[I][dim], L);
+                R_map[dim] += C[I][j] * r_shift;
+            }
+        }
+    }
+}
+
+void Cg_sites::map_CG_velocities()
+{
     double *v = fg_atoms->v;
     double **C = matrix_C->C;
 
@@ -128,19 +166,6 @@ void Cg_sites::output()
             VMAP[i + cg_num]   += C[i][j] * v[j + fg];
             VMAP[i + 2 * cg_num] += C[i][j] * v[j + 2 * fg];
         }
-    }
-    //header
-    cgtrj << "ITEM: TIMESTEP" << std::endl;
-    cgtrj << fg_atoms->currentStep << std::endl;
-    cgtrj << "ITEM: NUMBER OF ATOMS" << std::endl;
-    cgtrj << cg_num << std::endl;
-    cgtrj << "ITEM: BOX BOUNDS pp pp pp" << std::endl;
-    for (int i = 0; i < 3; i++) cgtrj << "0 " << fg_atoms->L << std::endl;
-    cgtrj << "ITEM: ATOMS id type m x y z vx vy vz fx fy fz" << std::endl;
-
-    for (int i = 0; i < cg_num; i++)
-    {
-        cgtrj << i + 1 << ' ' << 1 << ' ' << M[i] << ' ' << R[i][0] << ' ' << R[i][1] << ' ' << R[i][2] << ' ' << V[i] << ' ' << V[i + cg_num] << ' ' << V[i + 2 * cg_num] << ' ' << VMAP[i] << ' ' << VMAP[i + cg_num] << ' ' << VMAP[i + 2 * cg_num] << std::endl;
     }
 }
 
@@ -168,7 +193,7 @@ void Cg_sites::IterateRMapToSelfConsistency()
                 R_initial[dim] = R[i][dim];
                 R_recalc[dim] = 0;
             }
-            matrix_C->recalc_CG_position(i, R_recalc);
+            map_CG_position(i, R_recalc);
 
             // The next fixed point iterate is a fraction of the original
             // plus a fraction of the new. Track total squared change to check termination.

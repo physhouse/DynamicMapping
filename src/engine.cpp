@@ -347,7 +347,6 @@ void Engine::checker()
     for (int i=0; i<3; i++) checkmap<<"0 "<<fg_atoms->L<<std::endl;
     checkmap<<"ITEM: ATOMS id type m x y z vx vy vz"<<std::endl;*/
 
-    double **r = fg_atoms->r;
     double **C = matrix_C->C;
     double   L = fg_atoms->L;
     double   error = 0.0;
@@ -365,7 +364,7 @@ void Engine::checker()
         // The recalculation of the CG site positions from the map
         // should be in cg_sites.
         if (check_mapped_positions) {
-            matrix_C->recalc_CG_position(i, recalc_R);
+            cg_sites->map_CG_position(i, recalc_R);
             error += (recalc_R[0] - cg_sites->R[i][0]) * (recalc_R[0] - cg_sites->R[i][0]) + (recalc_R[1] - cg_sites->R[i][1]) * (recalc_R[1] - cg_sites->R[i][1]) + (recalc_R[2] - cg_sites->R[i][2]) * (recalc_R[2] - cg_sites->R[i][2]);
             checkmap << i + 1 << ' ' << 1 << ' ' << recalc_R[0] - cg_sites->R[i][0] << ' ' << recalc_R[1] - cg_sites->R[i][1] << ' ' << recalc_R[2] - cg_sites->R[i][2] << ' ' << std::endl;
         }
