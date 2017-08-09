@@ -30,22 +30,12 @@ double Matrix_C::weight(double r)
 
     /* tanh */
     //return 0.5 - 0.5 * tanh((r - rcut) / (rcut * 0.66));
-    double sigma = rcut * sigmaOverRcut;
     return 0.5 - 0.5 * tanh((r - rcut) / sigma);
 }
 
 void Matrix_C::weight_deriv(double *R, double *r, double *dw_vec)
 {
-    double distance = 0.0;
-    for (int dim = 0; dim < 3; dim++)
-    {
-        double r_dim = R[dim] - r[dim];
-        if (r_dim > 0.5 * L) distance += (r_dim - L) * (r_dim - L);
-        else if (r_dim < -0.5 * L) distance += (r_dim + L) * (r_dim + L);
-        else distance += r_dim * r_dim;
-    }
-
-    distance = sqrt(distance);
+    double distance = sqrt(calc_sq_distance(R, r, L));
 
     //Gaussian
     //double r0 = distance / rcut;
@@ -54,7 +44,6 @@ void Matrix_C::weight_deriv(double *R, double *r, double *dw_vec)
     //double tanhr = tanh((distance - rcut) / (rcut * 0.66));
     //double dwdr = -0.5 * (1.0 - tanhr * tanhr) / (rcut * 0.66);
 
-    double sigma = rcut * sigmaOverRcut;
     double tanhr = tanh((distance - rcut) / sigma);
     double dwdr = -0.5 * (1.0 - tanhr * tanhr) / sigma;
 
@@ -106,7 +95,7 @@ void Matrix_C::init()
 
     L    = fg_atoms->L;
     rcut = cg_sites->rcut;
-    sigmaOverRcut = cg_sites->sigmaOverRcut;
+    sigma = rcut * cg_sites->sigmaOverRcut;
 
     // set up the gaussian distribution
     width = 4.8;
