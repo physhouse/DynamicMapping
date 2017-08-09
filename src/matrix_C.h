@@ -11,11 +11,9 @@ public:
 
     void init();
     double w_Ij(double *R, double *r);
-    double weightsVarying(double *R, double *r, double M);
-    double weight(double r);
-    double massWeights(double M);
-    void weight_deriv(double *R, double *r, double *dwvec);
-    void weightsVarying_deriv(double *R, double *r, double *dwvec, double M, double alpha);
+    double calc_proximity(const double r) const;
+    void calc_proximity_deriv(const double * const R, const double * const r, double * const dwvec) const;
+    void calc_proximity_and_deriv(const double * const R, const double * const r, double &w, double * const dw_vec) const;
 
     void matrixGenerator();
     double generateWeights();

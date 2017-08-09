@@ -16,33 +16,30 @@ Matrix_C::~Matrix_C()
 }
 
 // Calculation functions
-double Matrix_C::w_Ij(double *R, double *r)
-{
-    double sq_distance = calc_sq_distance(R, r, L);
-    return weight(sqrt(sq_distance));
+
+void Matrix_C::calc_proximity_and_deriv(const double * const R, const double * const r, double &w, double * const dw_vec) const {
+
+    double distance = sqrt(calc_sq_distance(R, r, L));
+    double tanhr = tanh((distance - rcut) / sigma);
+    w = 0.5 - 0.5 * tanhr;
+    double dwdr = -0.5 * (1.0 - tanhr * tanhr) / sigma;
+
+    for (int idim = 0; idim < 3; idim++)
+    {
+        double r_dim = R[idim] - r[idim];
+        wrap_coord_relative(r_dim, 0, L);
+        dw_vec[idim] = dwdr * r_dim / distance;
+    }
 }
 
-double Matrix_C::weight(double r)
+double Matrix_C::calc_proximity(const double r) const
 {
-    /* Gaussian */
-    //double r0 = r / rcut;
-    //return exp(- r0 * r0);
-
-    /* tanh */
-    //return 0.5 - 0.5 * tanh((r - rcut) / (rcut * 0.66));
     return 0.5 - 0.5 * tanh((r - rcut) / sigma);
 }
 
-void Matrix_C::weight_deriv(double *R, double *r, double *dw_vec)
+void Matrix_C::calc_proximity_deriv(const double * const R, const double * const r, double * const dw_vec) const
 {
     double distance = sqrt(calc_sq_distance(R, r, L));
-
-    //Gaussian
-    //double r0 = distance / rcut;
-    //double dwdr = - 2.0 * (r0 / rcut) * exp(-r0 * r0);
-
-    //double tanhr = tanh((distance - rcut) / (rcut * 0.66));
-    //double dwdr = -0.5 * (1.0 - tanhr * tanhr) / (rcut * 0.66);
 
     double tanhr = tanh((distance - rcut) / sigma);
     double dwdr = -0.5 * (1.0 - tanhr * tanhr) / sigma;
@@ -143,8 +140,7 @@ void Matrix_C::matrixGenerator()
         for (int j = 0; j < neighbor->numNeighbors[i]; j++)
         {
             int index = neighbor->list[i][j];
-            W[i][index] = w_Ij(R[i], r[index]);
-            weight_deriv(R[i], r[index], dw[i][index]);
+            calc_proximity_and_deriv(R[i], r[index], W[i][index], dw[i][index]);
         }
     }
 
@@ -193,48 +189,6 @@ void Matrix_C::matrixGenerator()
     }
 
     generateMass();
-}
-
-double Matrix_C::massWeights(double M)
-{
-    return exp(- (M - M0) * (M - M0) / (2 * width * width));
-}
-
-double Matrix_C::generateWeights()
-{
-    double **R = cg_sites->R;
-    double **r = fg_atoms->r;
-    int     *numNeighbors = neighbor->numNeighbors;
-    int     *numFgNeighbors = neighbor->numFgNeighbors;
-    int    **list = neighbor->list;
-    int    **fgList = neighbor->fgList;
-
-    double error = 0.0;
-    double alpha = 0.05;
-
-    for (int I = 0; I < cg_num; I++)
-    {
-        for (int i = 0; i < numNeighbors[I]; i++)
-        {
-            int index = list[I][i];
-            double temp = W[I][index];
-            W[I][index] = (1.0 - alpha) * temp + alpha * weightsVarying(R[I], r[index], F[I]);
-            error += (W[I][index] - temp) * (W[I][index] - temp);
-        }
-    }
-
-    double test_sum = 0.0;
-    for (int i = 0; i < fg_num; i++)
-    {
-        w_sum[i] = 0.0;
-        for (int j = 0; j < numFgNeighbors[i]; j++)
-        {
-            int index = fgList[i][j];
-            w_sum[i] += W[index][i];
-        }
-        test_sum += w_sum[i];
-    }
-    return sqrt(error);
 }
 
 void Matrix_C::generateMass()
@@ -295,6 +249,5 @@ void Matrix_C::generateMatrixC()
 
 void Matrix_C::compute()
 {
-    //iterateSolver();
     matrixGenerator();
 }
