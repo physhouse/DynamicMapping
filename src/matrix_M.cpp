@@ -1,4 +1,6 @@
+#ifndef __APPLE__
 #include "omp.h"
+#endif
 #include "mapping.h"
 #include "pointers.h"
 #include "matrix_M.h"

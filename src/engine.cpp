@@ -8,13 +8,30 @@
 #include "cg_sites.h"
 #include "fg_atoms.h"
 #include "neighbor.h"
+#ifdef __APPLE__
+#include <Accelerate/Accelerate.h>
+#else
 #include "lapacke.h"
 #include "cblas.h"
+#endif
 #include <ctime>
 
+#ifdef __APPLE__
+void check_MatrixSolver_lapack(const char * const name, const int info) {
+    if (info != 0) {
+        if (info < 0) {
+            printf("Illegal call to %s in MatrixSolver, argument %d", name, -info);
+        } else {
+            printf("Singular matrix encountered in %s in MatrixSolver, element (%d, %d)", name, info, info);
+        }
+        exit(EXIT_FAILURE);
+    }
+}
+#else
 extern void cblas_dgemv(const CBLAS_ORDER layout, const CBLAS_TRANSPOSE TransA,
                         const int M, const int N, const double alpha, const double *A, const int lda,
                         const double *X, const int incX, const double beta, double *Y, const int incY);
+#endif
 
 Engine::Engine(Mapping *map) : Pointers(map) {}
 Engine::~Engine()
@@ -247,8 +264,18 @@ void Engine::matrixSolver()
         }
     }
 
+#ifdef __APPLE__
+    int info;
+    int lwork = m;
+    double work[m];
+    dgetrf_(&m, &m, A, &lda, ipiv, &info);
+    check_MatrixSolver_lapack("dgetrf", info);
+    dgetri_(&m, A, &lda, ipiv, work, &lwork, &info);
+    check_MatrixSolver_lapack("dgetri", info);
+#else
     LAPACKE_dgetrf(LAPACK_ROW_MAJOR, m, m, A, lda, ipiv);
     LAPACKE_dgetri(LAPACK_ROW_MAJOR, m, A, lda, ipiv);  //Now A stores the inverse of (1-M)
+#endif
 
     //Do the matrix Multiplication of (1-M)^(-1) with (C+N)
     enum CBLAS_ORDER order;
@@ -268,6 +295,7 @@ void Engine::matrixSolver()
     int incx = 1;
     int incy = 1;
     cblas_dgemv(order, transa, m, m, alpha, A, m, flat_CNv, incx, beta, V_CG, incy);
+
     printf("passing calculating V_CG\n");
     delete[] A;
 }
