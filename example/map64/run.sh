@@ -1,3 +1,3 @@
 #!/bin/bash
 
-../../test.x ../dump.lj 20000
+../../test.x ../dump.lj 20

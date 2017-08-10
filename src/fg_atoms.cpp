@@ -111,7 +111,7 @@ void Fg_atoms::readLammpsHeader()
     std::string line;
     int flag = 1;
 
-    while (flag == 1)
+    while (flag == 1 && input->trajectory.good())
     {
         // read next line in the header
         std::getline(input->trajectory, line);
@@ -193,15 +193,18 @@ void Fg_atoms::readLammpsHeader()
 
                 if ((set_x == 0) || (set_v == 0))
                 {
-                    printf("Warning: Either position of speed was not set\n");
-                    exit(-1);
+                    printf("Warning: Either position or velocity was not set\n");
                 }
             }
             else
             {
-                printf("Unrecognized line inheader %s", line.c_str());
+                printf("Unrecognized line in header %s", line.c_str());
             }
         }
+    }
+    if (!input->trajectory.good()) {
+        printf("Unexpected end of FG trajectory file while reading next header.\n");
+        exit(EXIT_FAILURE);
     }
     return;
 }
@@ -216,8 +219,9 @@ void Fg_atoms::readLammpsBody()
         std::getline(input->trajectory, line, '\n');
         if ((j = stringSplit(line, " \t", input->elements)) != input->header_size)
         {
-            printf("Warning: Number of fields detedted in frame body");
+            printf("Warning: Number of fields detected in frame body");
             printf("(%d) does not agree with number expected from frame header (%d)!\n", j, input->header_size);
+            exit(EXIT_FAILURE);
         }
 
         for (j = 0; j < 3; j++)
