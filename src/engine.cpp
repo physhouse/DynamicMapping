@@ -33,7 +33,6 @@ void Engine::init(int argc)
     cg_num = cg_sites->cg_num;
 
     int size_cg = 3 * cg_num;
-    int size_fg = 3 * fg_num;
 
     IMinusM = new double* [size_cg];
     flat_CNv = new double [size_cg];
@@ -63,7 +62,6 @@ void Engine::cleanup()
         delete[] IMinusM[i];
     }
     delete[] IMinusM;
-    delete[] vMap;
 }
 
 void Engine::buildNeighbors()
@@ -225,7 +223,7 @@ void Engine::computeMatrices()
                     IMinusM[i][j] = deltaij - M[idim][jdim][i - offset_d1][j - offset_d2];
                 }
             }
-            flat_CNv[i] = CNv[idim][i - offset_d1];
+            flat_CNv[i] = vector_CNv->CNv[idim][i - offset_d1];
         }
     }
 
@@ -234,7 +232,6 @@ void Engine::computeMatrices()
 void Engine::matrixSolver()
 {
     double *V_CG = cg_sites->V;
-    double *v_fg = fg_atoms->v;
 
     int m = 3 * cg_num;
     int lda = m;
@@ -305,7 +302,6 @@ void Engine::checker()
     checkmap<<"ITEM: ATOMS id type m x y z vx vy vz"<<std::endl;*/
 
     double **C = matrix_C->C;
-    double   L = fg_atoms->L;
     double   error = 0.0;
 
     bool check_mapped_positions = false;
@@ -338,15 +334,4 @@ void Engine::checker()
     if (check_mapped_positions) {
         checkmap << error << std::endl;
     }
-
-    // Check the current inverse mass of the CG site.
-    for (int i = 0; i < 3 * cg_sites->cg_num; i++)
-    {
-        double sum_bij_sq = 0.0;
-        for (int j = 0; j < 3 * fg_atoms->fg_num; j++)
-            sum_bij_sq += vMap[i * 3 * fg_num + j] * vMap[i * 3 * fg_num + j];
-
-        invMass << sum_bij_sq << std::endl;
-    }
-
 }

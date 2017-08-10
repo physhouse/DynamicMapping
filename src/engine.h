@@ -25,7 +25,6 @@ public:
 private:
     double **IMinusM;
     double  *flat_CNv;
-    double   ke; //Kinetic Energy
 
     int     cg_num;
     int     fg_num;

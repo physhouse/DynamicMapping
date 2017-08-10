@@ -4,7 +4,12 @@ CBLASPATH = /project/gavoth/ynhan/local/CBLAS/include
 LIBCBLAS = /project/gavoth/ynhan/local/CBLAS/lib/
 OPT = -O3 -Wall -g
 
-../test.x : test.o engine.o fg_atoms.o cg_sites.o matrix_C.o matrix_M.o vector_CNv.o mapping.o neighbor.o geom.o
+CFLAGS = -I$(LAPACKEPATH) -I$(CBLASPATH)
+LDFLAGS = -L$(LIBLAPACKPATH) -L$(LIBCBLAS)
+LIBS = -lblas -llapacke -llapack -lcblas -lgfortran
+CC = g++ $(OPT) -fopenmp
+
+../test.x : test.o engine.o fg_atoms.o cg_sites.o matrix_C.o matrix_M.o vector_CNv.o mapping.o  neighbor.o geom.o
 	$(CC) -o ../test.x *.o $(LDFLAGS) $(LIBS)
 
 test.o : test.cpp
