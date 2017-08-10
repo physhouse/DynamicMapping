@@ -1,8 +1,6 @@
-LIBLAPACKPATH = /project/gavoth/ynhan/local/lapack-3.5.0/
-LAPACKEPATH = /project/gavoth/ynhan/local/lapack-3.5.0/lapacke/include
-CBLASPATH = /project/gavoth/ynhan/local/CBLAS/include
-LIBCBLAS = /project/gavoth/ynhan/local/CBLAS/lib/
 OPT = -O3 -Wall -g
+CC = g++ $(OPT)
+LDFLAGS = -framework Accelerate
 
 ../test.x : test.o engine.o fg_atoms.o cg_sites.o matrix_C.o matrix_M.o vector_CNv.o mapping.o neighbor.o geom.o
 	$(CC) -o ../test.x *.o $(LDFLAGS) $(LIBS)
