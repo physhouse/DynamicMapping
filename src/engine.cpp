@@ -336,10 +336,10 @@ void Engine::matrixSolver()
     bool check_cnv_vector = true;
     if (check_cnv_vector) {
         cblas_dgemv(order, transa, m, n, alpha, B, n, v_fg, 1, beta, V_CG, 1);
-        checkmap << "Printing (C + N)v. Step: " << fg_atoms->currentStep << ", N_CG: "<< cg_num << std::endl;
+        checkmap << "Printing Nv. Step: " << fg_atoms->currentStep << ", N_CG: "<< cg_num << std::endl;
         for (int i = 0; i < cg_num; i++)
         {
-            checkmap << V_CG[i] << '\t' << V_CG[i + cg_num] << '\t' << V_CG[i + 2 * cg_num] << std::endl;
+            checkmap << V_CG[i] - cg_sites->VMAP[i] << '\t' << V_CG[i + cg_num] - cg_sites->VMAP[i + cg_num] << '\t' << V_CG[i + 2 * cg_num] - cg_sites->VMAP[i + 2 * cg_num] << std::endl;
         }
     }
 
