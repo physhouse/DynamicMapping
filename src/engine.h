@@ -26,7 +26,6 @@ private:
     double **IMinusM;
     double **CPlusN;
     double  *vMap;
-    double   ke; //Kinetic Energy
 
     int     cg_num;
     int     fg_num;
