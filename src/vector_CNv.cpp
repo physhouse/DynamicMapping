@@ -59,7 +59,7 @@ void Vector_CNv::generate_CNv()
     // then calculates -R_Ij * c_Ij * (\delta_IJ - f_Jj) * (d log w(R_Jj) / d R_Jj \cdot v_j).
     // Cv is accumulated along the way as well.
     // See Eq. 17 of Overlap_Matrix_Physics_III.pdf
-    for (int j = 0; j < cg_sites->cg_num; j++) {
+    for (int j = 0; j < fg_atoms->fg_num; j++) {
         // Access v_j
         double vj[3];
         for (int jdim = 0; jdim < 3; jdim++) 
