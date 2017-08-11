@@ -101,7 +101,7 @@ void Engine::update()
     matrixSolver();
     integrate();
     cg_sites->output();
-    checker();
+    //checker();
 }
 
 void Engine::exec()
@@ -294,6 +294,13 @@ void Engine::matrixSolver()
     // Computing the CG Velocities
     int incx = 1;
     int incy = 1;
+
+    // Check CNV vector
+    checkmap<<"CG:"<<cg_num<<std::endl;
+    for (int i=0; i<cg_num; i++)
+    {
+        checkmap<<flat_CNv[i]<<'\t'<<flat_CNv[i+cg_num]<<'\t'<<flat_CNv[i+2*cg_num]<<std::endl;
+    }
     cblas_dgemv(order, transa, m, m, alpha, A, m, flat_CNv, incx, beta, V_CG, incy);
 
     printf("passing calculating V_CG\n");
