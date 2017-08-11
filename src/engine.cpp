@@ -331,13 +331,16 @@ void Engine::matrixSolver()
         }
     }
 
-    // CHECK CNV vector Yining
-    cblas_dgemv(order, transa, m, n, alpha, B, n, v_fg, 1, beta, V_CG, 1);
 
-    checkmap<<"CG: "<<cg_num<<std::endl;
-    for (int i=0; i<cg_num; i++)
-    {
-        checkmap<<V_CG[i]<<'\t'<<V_CG[i+cg_num]<<'\t'<<V_CG[i+2*cg_num]<<std::endl;
+    // Check CNV vector
+    bool check_cnv_vector = true;
+    if (check_cnv_vector) {
+        cblas_dgemv(order, transa, m, n, alpha, B, n, v_fg, 1, beta, V_CG, 1);
+        checkmap << "Printing (C + N)v. Step: " << fg_atoms->currentStep << ", N_CG: "<< cg_num << std::endl;
+        for (int i = 0; i < cg_num; i++)
+        {
+            checkmap << V_CG[i] << '\t' << V_CG[i + cg_num] << '\t' << V_CG[i + 2 * cg_num] << std::endl;
+        }
     }
 
     cblas_dgemm(order, transa, transb, m, n, k, alpha, A, lda, B, ldb, beta, vMap, ldc);
@@ -388,7 +391,7 @@ void Engine::checker()
     double   error = 0.0;
 
     bool check_mapped_positions = false;
-    bool check_sum_c_squared = true;
+    bool check_sum_c_squared = false;
     for (int i = 0; i < cg_num; i++)
     {
         double recalc_R[3];
