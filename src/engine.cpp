@@ -301,7 +301,8 @@ void Engine::matrixSolver()
         checkmap << "Printing Nv. Step: " << fg_atoms->currentStep << ", N_CG: "<< cg_num << std::endl;
         for (int i=0; i<cg_num; i++)
         {
-            checkmap << flat_CNv[i] - cg_sites->VMAP[i] << '\t' << flat_CNv[i + cg_num] - cg_sites->VMAP[i + cg_num] << '\t' << flat_CNv[i + 2 * cg_num] - cg_sites->VMAP[i + 2 * cg_num] << std::endl;
+            checkmap << flat_CNv[i] << '\t' << flat_CNv[i + cg_num] << '\t' << flat_CNv[i + 2 * cg_num] << std::endl;
+            // checkmap << flat_CNv[i] - cg_sites->VMAP[i] << '\t' << flat_CNv[i + cg_num] - cg_sites->VMAP[i + cg_num] << '\t' << flat_CNv[i + 2 * cg_num] - cg_sites->VMAP[i + 2 * cg_num] << std::endl;
         }
     }
     cblas_dgemv(order, transa, m, m, alpha, A, m, flat_CNv, incx, beta, V_CG, incy);
