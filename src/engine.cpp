@@ -296,10 +296,13 @@ void Engine::matrixSolver()
     int incy = 1;
 
     // Check CNV vector
-    checkmap<<"CG:"<<cg_num<<std::endl;
-    for (int i=0; i<cg_num; i++)
-    {
-        checkmap<<flat_CNv[i]<<'\t'<<flat_CNv[i+cg_num]<<'\t'<<flat_CNv[i+2*cg_num]<<std::endl;
+    bool check_cnv_vector = true;
+    if (check_cnv_vector) {
+        checkmap << "Printing (C + N)v. Step: " << fg_atoms->currentStep << ", N_CG: "<< cg_num << std::endl;
+        for (int i=0; i<cg_num; i++)
+        {
+            checkmap << flat_CNv[i] << '\t' << flat_CNv[i + cg_num] << '\t' << flat_CNv[i + 2 * cg_num] << std::endl;
+        }
     }
     cblas_dgemv(order, transa, m, m, alpha, A, m, flat_CNv, incx, beta, V_CG, incy);
 
@@ -340,7 +343,7 @@ void Engine::checker()
     double   error = 0.0;
 
     bool check_mapped_positions = false;
-    bool check_sum_c_squared = true;
+    bool check_sum_c_squared = false;
     for (int i = 0; i < cg_num; i++)
     {
         double recalc_R[3];
