@@ -4,6 +4,7 @@
 #include "matrix_C.h"
 #include "cg_sites.h"
 #include "fg_atoms.h"
+#include "geom.h"
 #include "neighbor.h"
 #include <cmath>
 #include <cstdio>
@@ -78,7 +79,7 @@ void Vector_CNv::generate_CNv()
             {
                 vj_dot_logprox_Jj += dw[J][j][jdim] * vj[jdim];
             }
-            vj_dot_logprox_Jj /= -W[J][j];
+            vj_dot_logprox_Jj /= W[J][j];
 
             // Prepare f_Jj also.
             double f_Jj = W[J][j] / w_sum[j];
@@ -93,7 +94,9 @@ void Vector_CNv::generate_CNv()
                     // Add the contribution from Nv. Delta_IJ = 1.
                     double N_IJj_scalar = C[I][j] * (1 - f_Jj) * vj_dot_logprox_Jj;
                     for (int Idim = 0; Idim < 3; Idim++) {
-                        CNv[Idim][I] +=  (R[I][Idim] - r[j][Idim]) * N_IJj_scalar;
+                        double coord = r[j][Idim];
+                        wrap_coord_relative(coord, R[I][Idim], fg_atoms->L);
+                        CNv[Idim][I] +=  (R[I][Idim] - coord) * N_IJj_scalar;
                     }
                     // Add the contribution from Cv
                     for (int Idim = 0; Idim < 3; Idim++) {
@@ -103,7 +106,9 @@ void Vector_CNv::generate_CNv()
                     // Add the contribution from Nv. Delta_IJ = 0.
                     double N_IJj_scalar = - C[I][j] * f_Jj * vj_dot_logprox_Jj;
                     for (int Idim = 0; Idim < 3; Idim++) {
-                        CNv[Idim][I] +=  (R[I][Idim] - r[j][Idim]) * N_IJj_scalar;
+                        double coord = r[j][Idim];
+                        wrap_coord_relative(coord, R[I][Idim], fg_atoms->L);
+                        CNv[Idim][I] +=  (R[I][Idim] - coord) * N_IJj_scalar;
                     }
                 }
             }
