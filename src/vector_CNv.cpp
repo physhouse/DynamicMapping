@@ -44,6 +44,8 @@ void Vector_CNv::generate_CNv()
     double    **dw_sum  = matrix_C->dw_sum;
     double *v = fg_atoms->v;
 
+    // Reset the (C + N) v vector to zero before adding
+    // all of the elements together.
     for (int I = 0; I < cg_num; I++)
     {
         for (int idim = 0; idim < 3; idim++)
@@ -52,22 +54,22 @@ void Vector_CNv::generate_CNv()
         }
     }
 
+    // We calculate the N_Ij . v_j elements according to the formula
+    // N_Ij . vj = (R_I - r_j) C_Ij [( dlog wIj dr_j - dlog Wj dr_j) . v_j]
     for (int j = 0; j < fg_atoms->fg_num; j++) {
+        // Access v_j.
         double vj[3];
-        for (int jdim = 0; jdim < 3; jdim++) 
-        {
-            vj[jdim] = v[jdim * fg_num + j];
-        }
-
+        for (int jdim = 0; jdim < 3; jdim++) vj[jdim] = v[jdim * fg_num + j];
         for (int cgneigh = 0; cgneigh < neighbor->numFgNeighbors[j]; cgneigh++)
         {
             int I = neighbor->fgList[j][cgneigh];
             double N_Ij_scalar = 0;
-            // 
+            // Calculate C_Ij [( dlog wIj dr_j - dlog Wj dr_j) . v_j]
             for (int jdim = 0; jdim < 3; jdim++)
             {
                 N_Ij_scalar += C[I][j] * (dw[I][j][jdim] / W[I][j] - dw_sum[j][jdim] / w_sum[j]) * vj[jdim];
             }
+            // Add the correct vectors to (C + N) v.
             for (int Idim = 0; Idim < 3; Idim++)
             {
                 // Add the Cv vector term for this Ij pair.
@@ -79,7 +81,6 @@ void Vector_CNv::generate_CNv()
             }
         }
     }
-
 }
 
 void Vector_CNv::compute()
