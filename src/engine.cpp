@@ -339,7 +339,8 @@ void Engine::matrixSolver()
         checkmap << "Printing Nv. Step: " << fg_atoms->currentStep << ", N_CG: "<< cg_num << std::endl;
         for (int i = 0; i < cg_num; i++)
         {
-            checkmap << V_CG[i] - cg_sites->VMAP[i] << '\t' << V_CG[i + cg_num] - cg_sites->VMAP[i + cg_num] << '\t' << V_CG[i + 2 * cg_num] - cg_sites->VMAP[i + 2 * cg_num] << std::endl;
+            checkmap << V_CG[i] << '\t' << V_CG[i + cg_num] << '\t' << V_CG[i + 2 * cg_num] << std::endl;
+            //checkmap << V_CG[i] - cg_sites->VMAP[i] << '\t' << V_CG[i + cg_num] - cg_sites->VMAP[i + cg_num] << '\t' << V_CG[i + 2 * cg_num] - cg_sites->VMAP[i + 2 * cg_num] << std::endl;
         }
     }
 
@@ -387,7 +388,6 @@ void Engine::checker()
     checkmap<<"ITEM: ATOMS id type m x y z vx vy vz"<<std::endl;*/
 
     double **C = matrix_C->C;
-    double   L = fg_atoms->L;
     double   error = 0.0;
 
     bool check_mapped_positions = false;

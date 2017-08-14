@@ -5,6 +5,7 @@
 #include "matrix_C.h"
 #include "cg_sites.h"
 #include "fg_atoms.h"
+#include "geom.h"
 #include "neighbor.h"
 #include <cmath>
 #include <cstdio>
@@ -82,9 +83,11 @@ void Matrix_N::generate_N()
                     {
                         /* Notation:: N[d1][d2][I][j], d1->dimension of CG particles, d2->dimension of FG particles
                          * N[d1][d2][I][j] = sumover(i){r_i_d1 * dC_I_i/dr_j_d2} */
-                        N[jdim][0][I][j] +=  C[I][i] * C[I][j] * dcdx * (r[i][jdim] - R[I][jdim]);
-                        N[jdim][1][I][j] +=  C[I][i] * C[I][j] * dcdy * (r[i][jdim] - R[I][jdim]);
-                        N[jdim][2][I][j] +=  C[I][i] * C[I][j] * dcdz * (r[i][jdim] - R[I][jdim]);
+                        double coord = r[i][jdim];
+                        wrap_coord_relative(coord, R[I][jdim], fg_atoms->L);
+                        N[jdim][0][I][j] +=  C[I][i] * C[I][j] * dcdx * (coord - R[I][jdim]);
+                        N[jdim][1][I][j] +=  C[I][i] * C[I][j] * dcdy * (coord - R[I][jdim]);
+                        N[jdim][2][I][j] +=  C[I][i] * C[I][j] * dcdz * (coord - R[I][jdim]);
                         //N[jdim][0][I][j] +=  C[I][i] * C[I][j] * dcdx * r[i][jdim];
                         //N[jdim][1][I][j] +=  C[I][i] * C[I][j] * dcdy * r[i][jdim];
                         //N[jdim][2][I][j] +=  C[I][i] * C[I][j] * dcdz * r[i][jdim];
@@ -96,9 +99,11 @@ void Matrix_N::generate_N()
                     {
                         /* Notation:: N[d1][d2][I][j], d1->dimension of CG particles, d2->dimension of FG particles
                          * N[d1][d2][I][j] = sumover(i){r_i_d1 * dC_I_i/dr_j_d2} */
-                        N[jdim][0][I][j] += (C[I][i] - 1.0) * C[I][j] * dcdx * (r[i][jdim] - R[I][jdim]);
-                        N[jdim][1][I][j] += (C[I][i] - 1.0) * C[I][j] * dcdy * (r[i][jdim] - R[I][jdim]);
-                        N[jdim][2][I][j] += (C[I][i] - 1.0) * C[I][j] * dcdz * (r[i][jdim] - R[I][jdim]);
+                        double coord = r[i][jdim];
+                        wrap_coord_relative(coord, R[I][jdim], fg_atoms->L);
+                        N[jdim][0][I][j] += (C[I][i] - 1.0) * C[I][j] * dcdx * (coord - R[I][jdim]);
+                        N[jdim][1][I][j] += (C[I][i] - 1.0) * C[I][j] * dcdy * (coord - R[I][jdim]);
+                        N[jdim][2][I][j] += (C[I][i] - 1.0) * C[I][j] * dcdz * (coord - R[I][jdim]);
                         //N[jdim][0][I][j] +=  (C[I][i] - 1.0) * C[I][j] * dcdx * r[i][jdim];
                         //N[jdim][1][I][j] +=  (C[I][i] - 1.0) * C[I][j] * dcdy * r[i][jdim];
                         //N[jdim][2][I][j] +=  (C[I][i] - 1.0) * C[I][j] * dcdz * r[i][jdim];
