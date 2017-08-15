@@ -92,9 +92,12 @@ void Matrix_M::generate_M()
 
                     for (int jdim = 0; jdim < 3; jdim++)
                     {
-                        M[jdim][0][I][J] += C[I][i] * dcdx * (r[i][jdim] - R[I][jdim]);
-                        M[jdim][1][I][J] += C[I][i] * dcdy * (r[i][jdim] - R[I][jdim]);
-                        M[jdim][2][I][J] += C[I][i] * dcdz * (r[i][jdim] - R[I][jdim]);
+                        double dRr = r[i][jdim] - R[I][jdim];
+                        if (dRr > 0.5 * fg_atoms->L) dRr -= fg_atoms->L;
+                        else if (dRr < -0.5 * fg_atoms->L) dRr += fg_atoms->L;
+                        M[jdim][0][I][J] += C[I][i] * dcdx * dRr;
+                        M[jdim][1][I][J] += C[I][i] * dcdy * dRr;
+                        M[jdim][2][I][J] += C[I][i] * dcdz * dRr;
                     }
                 }
             }
@@ -127,9 +130,12 @@ void Matrix_M::generate_M()
 
                     for (int jdim = 0; jdim < 3; jdim++)
                     {
-                        M[jdim][0][I][J] += C[I][i] * dcdx * (r[i][jdim] - R[I][jdim]);
-                        M[jdim][1][I][J] += C[I][i] * dcdy * (r[i][jdim] - R[I][jdim]);
-                        M[jdim][2][I][J] += C[I][i] * dcdz * (r[i][jdim] - R[I][jdim]);
+                        double dRr = r[i][jdim] - R[I][jdim];
+                        if (dRr > 0.5 * fg_atoms->L) dRr -= fg_atoms->L;
+                        else if (dRr < -0.5 * fg_atoms->L) dRr += fg_atoms->L;
+                        M[jdim][0][I][J] += C[I][i] * dcdx * dRr;
+                        M[jdim][1][I][J] += C[I][i] * dcdy * dRr;
+                        M[jdim][2][I][J] += C[I][i] * dcdz * dRr;
                     }
                 }
             }
