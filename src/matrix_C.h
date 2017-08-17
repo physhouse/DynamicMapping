@@ -33,7 +33,7 @@ public:
     int      cg_num;
     int      fg_num;
     double   L;
-    double   rcut;   // Cutoff distance for the tanh(r-rc/sigma) function
+    double   proximity_threshold_dist;   // Threshold distance for the tanh(r-rc/sigma) function
     double   sigma;  // value of sigma of the tanh(r-rc/sigma) function
 
     double   width;  // Width of Gaussian Distribution

@@ -50,9 +50,9 @@ void Cg_sites::init(int argc, char **argv)
 
     L = fg_atoms->L;
     int nperdim = (int)cbrt((double)cg_num);
-    rcut = 0.50 * L / nperdim;
+    proximity_threshold_dist = 0.50 * L / nperdim;
 
-    printf("fgnum = %d cgnum = %d L = %12.8lf rcut = %12.8lf\n", fg_atoms->fg_num, cg_num, L, rcut);
+    printf("fgnum = %d cgnum = %d L = %12.8lf proximity_threshold_dist = %12.8lf\n", fg_atoms->fg_num, cg_num, L, proximity_threshold_dist);
     //Grid Initialization of CG particle positions
     if (argc <= 3)
     {

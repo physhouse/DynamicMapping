@@ -35,7 +35,7 @@ void Neighbor::init()
         memset(fgList[i], 0, sizeof(int) * cg_num);
     }
 
-    rcut = 2.0 * cg_sites->rcut;
+    rcut = 2.0 * cg_sites->proximity_threshold_dist;
     double L = fg_atoms->L;
     dimCell = L / rcut;
     numCells = dimCell * dimCell * dimCell;

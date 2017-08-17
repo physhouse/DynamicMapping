@@ -18,7 +18,7 @@ public:
     void cleanup();
 
     double   L;
-    double   rcut;
+    double   proximity_threshold_dist;
     double   sigmaOverRcut;
     int      cg_num;
     double   timestep;

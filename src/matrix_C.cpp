@@ -20,7 +20,7 @@ Matrix_C::~Matrix_C()
 void Matrix_C::calc_proximity_and_deriv(const double * const R, const double * const r, double &w, double * const dw_vec) const {
 
     double distance = sqrt(calc_sq_distance(R, r, L));
-    double tanhr = tanh((distance - rcut) / sigma);
+    double tanhr = tanh((distance - proximity_threshold_dist) / sigma);
     w = 0.5 - 0.5 * tanhr;
     double dwdr = -0.5 * (1.0 - tanhr * tanhr) / sigma;
 
@@ -34,14 +34,14 @@ void Matrix_C::calc_proximity_and_deriv(const double * const R, const double * c
 
 double Matrix_C::calc_proximity(const double r) const
 {
-    return 0.5 - 0.5 * tanh((r - rcut) / sigma);
+    return 0.5 - 0.5 * tanh((r - proximity_threshold_dist) / sigma);
 }
 
 void Matrix_C::calc_proximity_deriv(const double * const R, const double * const r, double * const dw_vec) const
 {
     double distance = sqrt(calc_sq_distance(R, r, L));
 
-    double tanhr = tanh((distance - rcut) / sigma);
+    double tanhr = tanh((distance - proximity_threshold_dist) / sigma);
     double dwdr = -0.5 * (1.0 - tanhr * tanhr) / sigma;
 
     for (int idim = 0; idim < 3; idim++)
@@ -89,10 +89,10 @@ void Matrix_C::init()
     w_sum = new double[fg_num];
     memset(w_sum, 0, sizeof(double) * fg_num);
     memset(sumC, 0, sizeof(double) * fg_num);
-
+    
     L    = fg_atoms->L;
-    rcut = cg_sites->rcut;
-    sigma = rcut * cg_sites->sigmaOverRcut;
+    proximity_threshold_dist = cg_sites->proximity_threshold_dist;
+    sigma = proximity_threshold_dist * cg_sites->sigmaOverRcut;
 
     // set up the gaussian distribution
     width = 4.8;
